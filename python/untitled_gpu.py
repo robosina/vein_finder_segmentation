@@ -69,7 +69,7 @@ model.load_weights('/home/saeed/CUDA_IN_QT-master/first_layer/python/HODA.h5')
 #results = model.predict_generator(testGene,30,verbose=1)
 #saveResult("data/membrane/test",results)
 #%%
-img=cv2.imread('/home/saeed/CUDA_IN_QT-master/first_layer/python/data/membrane/train-volume.tif')
+img=cv2.imread('/home/saeed/Music/11.jpg')
 #plt.imshow(img,cmap='gray')
 img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 img=cv2.resize(img,(256,256))
@@ -106,7 +106,7 @@ layer_name = 'conv2d_1'
 intermediate_layer_model = Model(inputs=model.input,
                                  outputs=model.get_layer(layer_name).output)
 import cv2
-data=cv2.imread('/home/saeed/CUDA_IN_QT-master/first_layer/python/data/membrane/train-volume.tif')
+data=cv2.imread('/home/saeed/Music/11.jpg')
 
 data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
 data=cv2.resize(data,(256,256))
@@ -129,7 +129,7 @@ intermediate_output = np.squeeze(intermediate_output)
 #
 #d=np.squeeze(data)
 data=np.squeeze(data)
-np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/python/c1.txt',data,delimiter=',')
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/c1.txt',data,delimiter=',')
 #np.savetxt('/home/nict/Documents/cuda_translate/c2.txt',d[:,:,1],delimiter=',')
 #np.savetxt('/home/nict/Documents/cuda_translate/c3.txt',d[:,:,2],delimiter=',')
 #
@@ -158,7 +158,7 @@ layer_name = 'conv2d_2'
 intermediate_layer_model = Model(inputs=model.input,
                                  outputs=model.get_layer(layer_name).output)
 import cv2
-data=cv2.imread('/home/saeed/CUDA_IN_QT-master/first_layer/python/data/membrane/train-volume.tif')
+data=cv2.imread('/home/saeed/Music/11.jpg')
 data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
 data=cv2.resize(data,(256,256))
 data=np.array(data,dtype='float32')
@@ -199,7 +199,7 @@ layer_name = 'max_pooling2d_1'
 intermediate_layer_model = Model(inputs=model.input,
                                  outputs=model.get_layer(layer_name).output)
 import cv2
-data=cv2.imread('/home/saeed/CUDA_IN_QT-master/first_layer/python/data/membrane/train-volume.tif')
+data=cv2.imread('/home/saeed/Music/11.jpg')
 data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
 data=cv2.resize(data,(256,256))
 data=np.array(data,dtype='float32')
@@ -218,15 +218,437 @@ data=np.expand_dims(data,0)
 data=np.expand_dims(data,3)
 intermediate_maxp2d_1 = intermediate_layer_model.predict(data)
 intermediate_maxp2d_1 = np.squeeze(intermediate_maxp2d_1)  #get rid of batch size 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+#%%
+#%%
+layer_name = 'conv2d_3'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_3 = intermediate_layer_model.predict(data)
+intermediate_conv2d_3 = np.squeeze(intermediate_conv2d_3)  #get rid of batch size
+w_conv2d_3=model.layers[4].get_weights()[0]
+weight_matrix_3=np.zeros((32,144),dtype='float32')
+for i in range(0,32):
+    plane=w_conv2d_3[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,16):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,9])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_3[i,:]=each_volume
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/python/conv2d_3_weights.txt',weight_matrix_3,delimiter=',')
+
+conv2d_3_bias=np.expand_dims(model.layers[4].get_weights()[1],0)
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/python/conv2d_3_bias.txt',conv2d_3_bias,delimiter=',')
+w_conv2d_3_first_layer=np.squeeze(w_conv2d_3[:,:,:,0])
+#%%
+#%%
+#%%
+layer_name = 'conv2d_4'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_4 = intermediate_layer_model.predict(data)
+intermediate_conv2d_4 = np.squeeze(intermediate_conv2d_4)  #get rid of batch size
+w_conv2d_4=model.layers[5].get_weights()[0]
+weight_matrix_4=np.zeros((32,288),dtype='float32')
+for i in range(0,32):
+    plane=w_conv2d_4[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,32):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,9])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_4[i,:]=each_volume
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/conv2d_4_weights.txt',weight_matrix_4,delimiter=',')
+
+conv2d_4_bias=np.expand_dims(model.layers[5].get_weights()[1],0)
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/conv2d_4_bias.txt',conv2d_4_bias,delimiter=',')
+
+w_conv2d_4_first_layer=np.squeeze(w_conv2d_4[:,:,:,0])        
+w_conv2d_4_first_layer=np.squeeze(w_conv2d_4[:,:,:,1])        
+#%%
+model.summary()       
+layer_name = 'max_pooling2d_2'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_maxp2d_2 = intermediate_layer_model.predict(data)
+intermediate_maxp2d_2 = np.squeeze(intermediate_maxp2d_2)  #get rid of batch size 
+#%%
+layer_num=7
+for i in range(0,5):
+	disp(model.layers[layer_num].name)
+nfilters=64   # change this
+filter_depth=32
+layer_name = 'conv2d_5'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_5 = intermediate_layer_model.predict(data)
+intermediate_conv2d_5 = np.squeeze(intermediate_conv2d_5)  #get rid of batch size
+w_conv2d_5=model.layers[layer_num].get_weights()[0]
+weight_matrix_5=np.zeros((nfilters,filter_depth*3*3),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_5[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,9])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_5[i,:]=each_volume
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_5_weights.txt',weight_matrix_5,delimiter=',')
+
+conv2d_5_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_5_bias.txt',conv2d_5_bias,delimiter=',')
+
+w_conv2d_5_first_layer=np.squeeze(w_conv2d_5[:,:,:,0])        
+w_conv2d_5_first_layer=np.squeeze(w_conv2d_5[:,:,:,1]) 
+#%%
+layer_num=8
+for i in range(0,5):
+	disp(model.layers[layer_num].name)
+nfilters=64   # change this
+filter_depth=64
+layer_name = 'conv2d_6'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_6 = intermediate_layer_model.predict(data)
+intermediate_conv2d_6 = np.squeeze(intermediate_conv2d_6)  #get rid of batch size
+w_conv2d_6=model.layers[layer_num].get_weights()[0]
+weight_matrix_6=np.zeros((nfilters,filter_depth*3*3),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_6[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,9])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_6[i,:]=each_volume
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_6_weights.txt',weight_matrix_6,delimiter=',')
+
+conv2d_6_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_6_bias.txt',conv2d_6_bias,delimiter=',')
+
+w_conv2d_6_first_layer=np.squeeze(w_conv2d_6[:,:,:,0])        
+w_conv2d_6_first_layer=np.squeeze(w_conv2d_6[:,:,:,1])         
+#%% max_pooling2d_3
+
+layer_name = 'max_pooling2d_3'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_maxp2d_3 = intermediate_layer_model.predict(data)
+intermediate_maxp2d_3 = np.squeeze(intermediate_maxp2d_3) 
+#%% conv2d_7
+layer_num=10
+for i in range(0,5):
+	disp(model.layers[layer_num].name)
+nfilters=64   # change this
+filter_depth=64
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_7 = intermediate_layer_model.predict(data)
+intermediate_conv2d_7 = np.squeeze(intermediate_conv2d_7)  #get rid of batch size
+w_conv2d_7=model.layers[layer_num].get_weights()[0]
+weight_matrix_7=np.zeros((nfilters,filter_depth*3*3),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_7[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,9])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_7[i,:]=each_volume
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_7_weights.txt',weight_matrix_7,delimiter=',')
+
+conv2d_7_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_7_bias.txt',conv2d_7_bias,delimiter=',')
+
+w_conv2d_7_first_layer=np.squeeze(w_conv2d_7[:,:,:,0])        
+w_conv2d_7_first_layer=np.squeeze(w_conv2d_7[:,:,:,1])  
+#%% conv2d_8
+layer_num=11
+for i in range(0,5):
+	disp(model.layers[layer_num].name)
+nfilters=64   # change this
+filter_depth=64
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_8 = intermediate_layer_model.predict(data)
+intermediate_conv2d_8 = np.squeeze(intermediate_conv2d_8)  #get rid of batch size
+w_conv2d_8=model.layers[layer_num].get_weights()[0]
+weight_matrix_8=np.zeros((nfilters,filter_depth*3*3),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_8[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,9])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_8[i,:]=each_volume
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_8_weights.txt',weight_matrix_8,delimiter=',')
+
+conv2d_8_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_8_bias.txt',conv2d_8_bias,delimiter=',')
+
+w_conv2d_8_first_layer=np.squeeze(w_conv2d_8[:,:,:,0])        
+w_conv2d_8_first_layer=np.squeeze(w_conv2d_8[:,:,:,1])  
+#%% max_pooling2d_3
+
+layer_name = 'max_pooling2d_4'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_maxp2d_4 = intermediate_layer_model.predict(data)
+intermediate_maxp2d_4 = np.squeeze(intermediate_maxp2d_4)
+#%% 
+layer_num=14
+for i in range(0,5):
+	disp(model.layers[layer_num].name)
+nfilters=128   # change this
+filter_depth=64
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_9 = intermediate_layer_model.predict(data)
+intermediate_conv2d_9 = np.squeeze(intermediate_conv2d_9)  #get rid of batch size
+w_conv2d_9=model.layers[layer_num].get_weights()[0]
+weight_matrix_9=np.zeros((nfilters,filter_depth*3*3),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_9[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,9])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_9[i,:]=each_volume
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_9_weights.txt',weight_matrix_9,delimiter=',')
+
+conv2d_9_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_9_bias.txt',conv2d_9_bias,delimiter=',')
+
+w_conv2d_9_first_layer=np.squeeze(w_conv2d_9[:,:,:,0])        
+w_conv2d_9_first_layer=np.squeeze(w_conv2d_9[:,:,:,1])  
+#%% 
+layer_num=15
+for i in range(0,5):
+	disp(model.layers[layer_num].name)
+nfilters=128   # change this
+filter_depth=128
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread('/home/saeed/Music/11.jpg')
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_10 = intermediate_layer_model.predict(data)
+intermediate_conv2d_10 = np.squeeze(intermediate_conv2d_10)  #get rid of batch size
+w_conv2d_10=model.layers[layer_num].get_weights()[0]
+weight_matrix_10=np.zeros((nfilters,filter_depth*3*3),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_10[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,9])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_10[i,:]=each_volume
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_10_weights.txt',weight_matrix_10,delimiter=',')
+
+conv2d_10_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt('/home/saeed/CUDA_IN_QT-master/first_layer/weights/conv2d_10_bias.txt',conv2d_10_bias,delimiter=',')
+
+w_conv2d_10_first_layer=np.squeeze(w_conv2d_10[:,:,:,0])        
+w_conv2d_10_first_layer=np.squeeze(w_conv2d_10[:,:,:,0])  
