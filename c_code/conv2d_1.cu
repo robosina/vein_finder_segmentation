@@ -18,9 +18,16 @@ enum LAYER
     CONV2D_4,
     MAXP2D_2,
     CONV2D_5,
-    CONV2D_6
+    CONV2D_6,
+    MAXP2D_3,
+    CONV2D_7,
+    CONV2D_8,
+    MAXP2D_4,
+    CONV2D_9,
+    CONV2D_10
 };
 
+float time_sum=0;
 //global variables
 //*******conv2d_1**********
 float* d_input{0};
@@ -51,6 +58,26 @@ float* d_bias_5{0};
 float* d_output_6{0};
 float* d_kernel_6{0};
 float* d_bias_6{0};
+//******max_pooling2d_3****
+float* d_output_maxp_3{0};
+//*******conv2d_7**********
+float* d_output_7{0};
+float* d_kernel_7{0};
+float* d_bias_7{0};
+//*******conv2d_8**********
+float* d_output_8{0};
+float* d_kernel_8{0};
+float* d_bias_8{0};
+//******max_pooling2d_4****
+float* d_output_maxp_4{0};
+//*******conv2d_9**********
+float* d_output_9{0};
+float* d_kernel_9{0};
+float* d_bias_9{0};
+//*******conv2d_10**********
+float* d_output_10{0};
+float* d_kernel_10{0};
+float* d_bias_10{0};
 #define checkCUDNN(expression)                               \
   {                                                          \
     cudnnStatus_t status = (expression);                     \
@@ -191,6 +218,7 @@ __global__ void MAXP2D_GPU(float *input_image, float *output_image,int nx, int n
 }
 extern "C" void conv2d_1(float* img_ptr,float** output,int w,int h,layer l)
 {
+    time_sum=0;
     cudaMemcpy(d_input, img_ptr, l.input_size, cudaMemcpyHostToDevice);
     cudaMemset(d_output, 0, l.output_size);
     CHECK(cudaMemcpy(d_kernel,l.weight,l.kernel_size, cudaMemcpyHostToDevice));
@@ -380,6 +408,136 @@ extern "C" void conv2d_6(float** output, int w, int h, layer l)
 
     *output=h_output;
 }
+
+extern "C" void maxp2d_3(float** output, int w, int h, layer l)
+{
+    cudaMemset(d_output_maxp_3, 0, l.output_size);
+
+    int dimx = 32;
+    int dimy = 32;
+    dim3 block(dimx, dimy);
+    dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
+    double t1=GetTime();
+    for (int i = 0; i < l.nfilters; ++i)   //which volume is selected for conv
+    {
+        MAXP2D_GPU<<<grid,block>>>(d_output_6,d_output_maxp_3,w,h,i);
+    }
+    printf("time elapsed \033[1;33mmaxp2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+    float* h_output =(float*)malloc(l.output_size);
+    cudaMemcpy(h_output, d_output_maxp_3,l.output_size, cudaMemcpyDeviceToHost);
+    *output=h_output;
+}
+
+extern "C" void conv2d_7(float** output, int w, int h, layer l)
+{
+    cudaMemset(d_output_7, 0, l.output_size);
+    CHECK(cudaMemcpy(d_kernel_7,l.weight,l.kernel_size, cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(d_bias_7,l.bias,l.bias_size,cudaMemcpyHostToDevice));
+
+    int dimx = 32;
+    int dimy = 32;
+    dim3 block(dimx, dimy);
+    dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
+    double t1=GetTime();
+    for (int i = 0; i < l.nfilters; ++i)   //which volume is selected for conv
+    {
+        CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_3,d_output_7,d_kernel_7,d_bias_7,
+                                      w,h,i,l.depth);
+    }
+    printf("time elapsed \033[1;33mconv2d_7:%f msec\n\033[0m",1000*(GetTime()-t1));
+    float* h_output =(float*)malloc(l.output_size);
+    cudaMemcpy(h_output, d_output_7,l.output_size, cudaMemcpyDeviceToHost);
+
+    *output=h_output;
+}
+
+extern "C" void conv2d_8(float** output, int w, int h, layer l)
+{
+    cudaMemset(d_output_8, 0, l.output_size);
+    CHECK(cudaMemcpy(d_kernel_8,l.weight,l.kernel_size, cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(d_bias_8,l.bias,l.bias_size,cudaMemcpyHostToDevice));
+
+    int dimx = 32;
+    int dimy = 32;
+    dim3 block(dimx, dimy);
+    dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
+    double t1=GetTime();
+    for (int i = 0; i < l.nfilters; ++i)   //which volume is selected for conv
+    {
+        CONV2D_2_GPU1<<<grid,block>>>(d_output_7,d_output_8,d_kernel_8,d_bias_8,
+                                      w,h,i,l.depth);
+    }
+    printf("time elapsed \033[1;33mconv2d_7:%f msec\n\033[0m",1000*(GetTime()-t1));
+    float* h_output =(float*)malloc(l.output_size);
+    cudaMemcpy(h_output, d_output_8,l.output_size, cudaMemcpyDeviceToHost);
+
+    *output=h_output;
+}
+
+extern "C" void maxp2d_4(float** output, int w, int h, layer l)
+{
+    cudaMemset(d_output_maxp_4, 0, l.output_size);
+
+    int dimx = 32;
+    int dimy = 32;
+    dim3 block(dimx, dimy);
+    dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
+    double t1=GetTime();
+    for (int i = 0; i < l.nfilters; ++i)   //which volume is selected for conv
+    {
+        MAXP2D_GPU<<<grid,block>>>(d_output_8,d_output_maxp_4,w,h,i);
+    }
+    printf("time elapsed \033[1;33mmaxp2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+    float* h_output =(float*)malloc(l.output_size);
+    cudaMemcpy(h_output, d_output_maxp_4,l.output_size, cudaMemcpyDeviceToHost);
+    *output=h_output;
+}
+
+extern "C" void conv2d_9(float** output, int w, int h, layer l)
+{
+    cudaMemset(d_output_9, 0, l.output_size);
+    CHECK(cudaMemcpy(d_kernel_9,l.weight,l.kernel_size, cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(d_bias_9,l.bias,l.bias_size,cudaMemcpyHostToDevice));
+
+    int dimx = 32;
+    int dimy = 32;
+    dim3 block(dimx, dimy);
+    dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
+    double t1=GetTime();
+    for (int i = 0; i < l.nfilters; ++i)   //which volume is selected for conv
+    {
+        CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_4,d_output_9,d_kernel_9,d_bias_9,
+                                      w,h,i,l.depth);
+    }
+    printf("time elapsed \033[1;33mconv2d_9:%f msec\n\033[0m",1000*(GetTime()-t1));
+    float* h_output =(float*)malloc(l.output_size);
+    cudaMemcpy(h_output, d_output_9,l.output_size, cudaMemcpyDeviceToHost);
+
+    *output=h_output;
+}
+
+extern "C" void conv2d_10(float** output, int w, int h, layer l)
+{
+    cudaMemset(d_output_10, 0, l.output_size);
+    CHECK(cudaMemcpy(d_kernel_10,l.weight,l.kernel_size, cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(d_bias_10,l.bias,l.bias_size,cudaMemcpyHostToDevice));
+
+    int dimx = 32;
+    int dimy = 32;
+    dim3 block(dimx, dimy);
+    dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
+    double t1=GetTime();
+    for (int i = 0; i < l.nfilters; ++i)   //which volume is selected for conv
+    {
+        CONV2D_2_GPU1<<<grid,block>>>(d_output_9,d_output_10,d_kernel_10,d_bias_10,
+                                      w,h,i,l.depth);
+    }
+    printf("time elapsed \033[1;33mconv2d_10:%f msec\n\033[0m",1000*(GetTime()-t1));
+    float* h_output =(float*)malloc(l.output_size);
+    cudaMemcpy(h_output, d_output_10,l.output_size, cudaMemcpyDeviceToHost);
+
+    *output=h_output;
+}
 extern "C" void LOAD_NEURAL_NETWORK(LAYER Layer, int w, int h, layer& l)
 {
     switch (Layer) {
@@ -504,6 +662,92 @@ extern "C" void LOAD_NEURAL_NETWORK(LAYER Layer, int w, int h, layer& l)
         printf("\033[1;31mLOAD CONV2D_6: image:%d,%d \n\033[0m",w,h);
         break;
     }
+    case MAXP2D_3:
+    {
+        l.output_size = w * h *l.nfilters * sizeof(float);
+        cudaMalloc(&d_output_maxp_3, l.output_size);
+
+        l.im_h=h;
+        l.im_w=w;
+
+        printf("\033[1;31mLOAD MAXP2D_3: image:%d,%d \n\033[0m",w,h);
+        break;
+    }
+    case CONV2D_7:
+    {
+        l.output_size = w * h *l.nfilters * sizeof(float);
+        cudaMalloc(&d_output_7, l.output_size);
+
+        l.kernel_size = l.width * l.height * l.nfilters * l.depth * sizeof(float);
+        cudaMalloc( (void**)&d_kernel_7, l.kernel_size);
+
+        l.bias_size = l.nfilters * sizeof(float);
+        cudaMalloc((void**)&d_bias_7, l.bias_size);
+
+        l.im_h=h;
+        l.im_w=w;
+        printf("\033[1;31mLOAD CONV2D_7: image:%d,%d \n\033[0m",w,h);
+        break;
+    }
+    case CONV2D_8:
+    {
+        l.output_size = w * h *l.nfilters * sizeof(float);
+        cudaMalloc(&d_output_8, l.output_size);
+
+        l.kernel_size = l.width * l.height * l.nfilters * l.depth * sizeof(float);
+        cudaMalloc( (void**)&d_kernel_8, l.kernel_size);
+
+        l.bias_size = l.nfilters * sizeof(float);
+        cudaMalloc((void**)&d_bias_8, l.bias_size);
+
+        l.im_h=h;
+        l.im_w=w;
+        printf("\033[1;31mLOAD CONV2D_8: image:%d,%d \n\033[0m",w,h);
+        break;
+    }
+    case MAXP2D_4:
+    {
+        l.output_size = w * h *l.nfilters * sizeof(float);
+        cudaMalloc(&d_output_maxp_4, l.output_size);
+
+        l.im_h=h;
+        l.im_w=w;
+
+        printf("\033[1;31mLOAD MAXP2D_4: image:%d,%d \n\033[0m",w,h);
+        break;
+    }
+    case CONV2D_9:
+    {
+        l.output_size = w * h *l.nfilters * sizeof(float);
+        cudaMalloc(&d_output_9, l.output_size);
+
+        l.kernel_size = l.width * l.height * l.nfilters * l.depth * sizeof(float);
+        cudaMalloc( (void**)&d_kernel_9, l.kernel_size);
+
+        l.bias_size = l.nfilters * sizeof(float);
+        cudaMalloc((void**)&d_bias_9, l.bias_size);
+
+        l.im_h=h;
+        l.im_w=w;
+        printf("\033[1;31mLOAD CONV2D_9: image:%d,%d \n\033[0m",w,h);
+        break;
+    }
+    case CONV2D_10:
+    {
+        l.output_size = w * h *l.nfilters * sizeof(float);
+        cudaMalloc(&d_output_10, l.output_size);
+
+        l.kernel_size = l.width * l.height * l.nfilters * l.depth * sizeof(float);
+        cudaMalloc( (void**)&d_kernel_10, l.kernel_size);
+
+        l.bias_size = l.nfilters * sizeof(float);
+        cudaMalloc((void**)&d_bias_10, l.bias_size);
+
+        l.im_h=h;
+        l.im_w=w;
+        printf("\033[1;31mLOAD CONV2D_10: image:%d,%d \n\033[0m",w,h);
+        break;
+    }
     default:
         break;
     }
@@ -542,5 +786,25 @@ extern "C" void Remove_NN()
     cudaFree(d_output_6);
     cudaFree(d_kernel_6);
     cudaFree(d_bias_6);
+    // 9th layer
+    cudaFree(d_output_maxp_3);
+    // 10th layer
+    cudaFree(d_output_7);
+    cudaFree(d_kernel_7);
+    cudaFree(d_bias_7);
+    // 11th layer
+    cudaFree(d_output_8);
+    cudaFree(d_kernel_8);
+    cudaFree(d_bias_8);
+    // 12th layer
+    cudaFree(d_output_maxp_4);
+    // 13th layer
+    cudaFree(d_output_9);
+    cudaFree(d_kernel_9);
+    cudaFree(d_bias_9);
+    // 14th layer
+    cudaFree(d_output_10);
+    cudaFree(d_kernel_10);
+    cudaFree(d_bias_10);
     printf("\033[1;31mRemove weights from Memory\n\033[0m");
 }
