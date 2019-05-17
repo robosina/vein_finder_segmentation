@@ -18,21 +18,21 @@ conv2d_5 (Conv2D)               (None, 64, 64, 64)      **DONE**
 
 conv2d_6 (Conv2D)               (None, 64, 64, 64)      **DONE**
 
-max_pooling2d_3 (MaxPooling2D)  (None, 32, 32, 64)
+max_pooling2d_3 (MaxPooling2D)  (None, 32, 32, 64)      **DONE**
 
-conv2d_7 (Conv2D)               (None, 32, 32, 64)
+conv2d_7 (Conv2D)               (None, 32, 32, 64)      **DONE**
 
-conv2d_8 (Conv2D)               (None, 32, 32, 64)
+conv2d_8 (Conv2D)               (None, 32, 32, 64)      **DONE**
 
-dropout_1 (Dropout)             (None, 32, 32, 64)
+dropout_1 (Dropout)             (None, 32, 32, 64)      **DONE**
 
-max_pooling2d_4 (MaxPooling2D)  (None, 16, 16, 64) 
+max_pooling2d_4 (MaxPooling2D)  (None, 16, 16, 64)      **DONE**
 
-conv2d_9 (Conv2D)               (None, 16, 16, 128)
+conv2d_9 (Conv2D)               (None, 16, 16, 128)     **DONE**
 
-conv2d_10 (Conv2D)              (None, 16, 16, 128)
+conv2d_10 (Conv2D)              (None, 16, 16, 128)     **DONE**
 
-dropout_2 (Dropout)             (None, 16, 16, 128)
+dropout_2 (Dropout)             (None, 16, 16, 128)     **DONE**
 
 up_sampling2d_1 (UpSampling2D)  (None, 32, 32, 128) 
 
