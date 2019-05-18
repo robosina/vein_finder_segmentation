@@ -44,9 +44,9 @@ conv2d_12 (Conv2D)              (None, 32, 32, 64)      **DONE**
 
 conv2d_13 (Conv2D)              (None, 32, 32, 64)      **DONE**
 
-up_sampling2d_2 (UpSampling2D)  (None, 64, 64, 64)
+up_sampling2d_2 (UpSampling2D)  (None, 64, 64, 64)      **DONE**
 
-conv2d_14 (Conv2D)              (None, 64, 64, 32)
+conv2d_14 (Conv2D)              (None, 64, 64, 32)      **DONE**
 
 concatenate_2 (Concatenate)     (None, 64, 64, 96)
 
