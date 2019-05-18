@@ -33,22 +33,22 @@ def unet(pretrained_weights = None,input_size = (256,256,1)):
     conv5 = layers.Conv2D(base*8, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(conv5)
     drop5 = layers.Dropout(0.5)(conv5)
 #
-    up6 =  layers.Conv2D(base*4, 2, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(drop5))
+    up6 =  layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(drop5))
     merge6 = layers.concatenate([drop4,up6], axis = 3)
     conv6 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(merge6)
     conv6 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(conv6)
 
-    up7 = layers.Conv2D(base*2, 2, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(conv6))
+    up7 = layers.Conv2D(base*2, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(conv6))
     merge7 = layers.concatenate([conv3,up7], axis = 3)
     conv7 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(merge7)
     conv7 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(conv7)
 
-    up8 = layers.Conv2D(base*2, 2, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(conv7))
+    up8 = layers.Conv2D(base*2, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(conv7))
     merge8 = layers.concatenate([conv2,up8], axis = 3)
     conv8 = layers.Conv2D(base*2, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(merge8)
     conv8 = layers.Conv2D(base*2, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(conv8)
 
-    up9 = layers.Conv2D(base, 2, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(conv8))
+    up9 = layers.Conv2D(base, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(conv8))
     merge9 = layers.concatenate([conv1,up9], axis = 3)
     conv9 = layers.Conv2D(base, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(merge9)
     conv9 = layers.Conv2D(base, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(conv9)
