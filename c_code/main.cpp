@@ -25,7 +25,12 @@ enum LAYER
     CONV2D_8,
     MAXP2D_4,
     CONV2D_9,
-    CONV2D_10
+    CONV2D_10,
+    UPSM2D_1,
+    CONV2D_11,
+    CONCAT_1,
+    CONV2D_12,
+    CONV2D_13
 };
 vector<float> weights_conv2d_1;   //first layer
 vector<float> bias_conv2d_1;      //first layer
@@ -47,7 +52,12 @@ vector<float> weights_conv2d_9;   //14th layer
 vector<float> bias_conv2d_9;      //14th layer
 vector<float> weights_conv2d_10;   //15th layer
 vector<float> bias_conv2d_10;      //15th layer
-
+vector<float> weights_conv2d_11;   //18th layer
+vector<float> bias_conv2d_11;      //18th layer
+vector<float> weights_conv2d_12;   //20th layer
+vector<float> bias_conv2d_12;      //20th layer
+vector<float> weights_conv2d_13;   //21th layer
+vector<float> bias_conv2d_13;      //21th layer
 
 extern "C" void conv2d_1(float* img_ptr,float** output,int w,int h,layer l);
 extern "C" void conv2d_2(float** output,int w,int h,layer l);
@@ -63,6 +73,11 @@ extern "C" void conv2d_8(float** output, int w, int h, layer l);
 extern "C" void maxp2d_4(float** output, int w, int h, layer l);
 extern "C" void conv2d_9(float** output, int w, int h, layer l);
 extern "C" void conv2d_10(float** output, int w, int h, layer l);
+extern "C" void upsample_2d_1(float** output, int w, int h, layer l);
+extern "C" void conv2d_11(float** output, int w, int h, layer l);
+extern "C" void concat_1(float** output, int w, int h, layer l);
+extern "C" void conv2d_12(float** output, int w, int h, layer l);
+extern "C" void conv2d_13(float** output, int w, int h, layer l);
 
 extern "C" void LOAD_NEURAL_NETWORK(LAYER Layer, int w, int h, layer& l);
 extern "C" void Remove_NN();
@@ -287,9 +302,72 @@ layer initialize_conv2d_10_layer()
     l.weight=&weights_conv2d_10[0];
     return l;
 }
+layer initialize_up_sampling2d_1()
+{
+    layer l;
+    l.depth=0;
+    l.width=0;
+    l.height=0;
+    l.nfilters=128;
+    return l;
+}
+layer initialize_conv2d_11_layer()
+{
+    layer l;
+    l.depth=128;
+    l.width=3;
+    l.height=3;
+    l.nfilters=64;
+    QString fileName=exe_path+"conv2d_11_weights.txt";
+    QString bias_file=exe_path+"conv2d_11_bias.txt";
+    weights_conv2d_11=read_file(fileName);
+    bias_conv2d_11=read_file(bias_file);
+    l.bias=&bias_conv2d_11[0];
+    l.weight=&weights_conv2d_11[0];
+    return l;
+}
+layer initialize_concat_1()
+{
+    layer l;
+    l.depth=0;
+    l.width=0;
+    l.height=0;
+    l.nfilters=128;
+    return l;
+}
+layer initialize_conv2d_12_layer()
+{
+    layer l;
+    l.depth=128;
+    l.width=3;
+    l.height=3;
+    l.nfilters=64;
+    QString fileName=exe_path+"conv2d_12_weights.txt";
+    QString bias_file=exe_path+"conv2d_12_bias.txt";
+    weights_conv2d_12=read_file(fileName);
+    bias_conv2d_12=read_file(bias_file);
+    l.bias=&bias_conv2d_12[0];
+    l.weight=&weights_conv2d_12[0];
+    return l;
+}
+layer initialize_conv2d_13_layer()
+{
+    layer l;
+    l.depth=64;
+    l.width=3;
+    l.height=3;
+    l.nfilters=64;
+    QString fileName=exe_path+"conv2d_13_weights.txt";
+    QString bias_file=exe_path+"conv2d_13_bias.txt";
+    weights_conv2d_13=read_file(fileName);
+    bias_conv2d_13=read_file(bias_file);
+    l.bias=&bias_conv2d_13[0];
+    l.weight=&weights_conv2d_13[0];
+    return l;
+}
 int main(int argc, char const *argv[])
 {
-    exe_path="/home/saeed/CUDA_IN_QT-master/first_layer/weights/";
+    exe_path="/home/nict/plate_finder_section/programs/cuda_c_code/5/weights/";
     cout<<exe_path.toStdString()<<endl;
     Mat img(256,256,CV_32FC1);
     QFile file1(exe_path+"c1.txt"); file1.open(QIODevice::ReadWrite); QTextStream in1(&file1);
@@ -318,9 +396,14 @@ int main(int argc, char const *argv[])
     layer l_maxp2d_4=initialize_max_pooling2d_4();
     layer l_conv2d_9=initialize_conv2d_9_layer();
     layer l_conv2d_10=initialize_conv2d_10_layer();
+    layer l_upsm2d_1=initialize_up_sampling2d_1();
+    layer l_conv2d_11=initialize_conv2d_11_layer();
+    layer l_concat_1=initialize_concat_1();
+    layer l_conv2d_12=initialize_conv2d_12_layer();
+    layer l_conv2d_13=initialize_conv2d_13_layer();
 
-    cout<<"layer conv2d_2 first weight:"<<l_conv2d_10.weight[0]<<endl;
-    cout<<"layer conv2d_2 first bias:"<<l_conv2d_10.bias[0]<<endl;
+    cout<<"layer conv2d_2 first weight:"<<l_conv2d_12.weight[0]<<endl;
+    cout<<"layer conv2d_2 first bias:"<<l_conv2d_12.bias[0]<<endl;
 
     enum LAYER layer_type;
     layer_type=CONV2D_1;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_1);
@@ -337,6 +420,12 @@ int main(int argc, char const *argv[])
     layer_type=MAXP2D_4;LOAD_NEURAL_NETWORK(layer_type,16,16,l_maxp2d_4);
     layer_type=CONV2D_9;LOAD_NEURAL_NETWORK(layer_type,16,16,l_conv2d_9);
     layer_type=CONV2D_10;LOAD_NEURAL_NETWORK(layer_type,16,16,l_conv2d_10);
+    layer_type=UPSM2D_1;LOAD_NEURAL_NETWORK(layer_type,32,32,l_upsm2d_1);
+    layer_type=CONV2D_11;LOAD_NEURAL_NETWORK(layer_type,32,32,l_conv2d_11);
+    layer_type=CONCAT_1;LOAD_NEURAL_NETWORK(layer_type,32,32,l_concat_1);
+    layer_type=CONV2D_12;LOAD_NEURAL_NETWORK(layer_type,32,32,l_conv2d_12);
+    layer_type=CONV2D_13;LOAD_NEURAL_NETWORK(layer_type,32,32,l_conv2d_13);
+
     float* output;
     float* output_conv2d_2;
     float* output_maxp2d_1;
@@ -351,6 +440,11 @@ int main(int argc, char const *argv[])
     float* output_maxp2d_4;
     float* output_conv2d_9;
     float* output_conv2d_10;
+    float* output_upsm2d_1;
+    float* output_conv2d_11;
+    float* output_concat_1;
+    float* output_conv2d_12;
+    float* output_conv2d_13;
 
     conv2d_1(img.ptr<float>(0),&output,img.cols,img.rows,l_conv2d_1);
     conv2d_2(&output_conv2d_2,img.cols,img.rows,l_conv2d_2);
@@ -366,15 +460,20 @@ int main(int argc, char const *argv[])
     maxp2d_4(&output_maxp2d_4,img.cols/16,img.rows/16,l_maxp2d_4);
     conv2d_9(&output_conv2d_9,img.cols/16,img.rows/16,l_conv2d_9);
     conv2d_10(&output_conv2d_10,img.cols/16,img.rows/16,l_conv2d_10);
+    upsample_2d_1(&output_upsm2d_1,img.cols/8,img.cols/8,l_upsm2d_1);
+    conv2d_11(&output_conv2d_11,img.cols/8,img.rows/8,l_conv2d_11);
+    concat_1(&output_concat_1,img.cols/8,img.cols/8,l_concat_1);
+    conv2d_12(&output_conv2d_12,img.cols/8,img.cols/8,l_conv2d_12);
+    conv2d_13(&output_conv2d_13,img.cols/8,img.cols/8,l_conv2d_13);
 
-    Size OShape(l_conv2d_9.im_w,l_conv2d_9.im_h);   //output shape
+    Size OShape(l_concat_1.im_w,l_concat_1.im_h);   //output shape
     int ALen=OShape.area();  //array length
     float* output2=(float*)malloc(ALen*sizeof (float));
-    for (int layer = 0; layer < 128; ++layer)
+    for (int layer = 0; layer < l_conv2d_12.nfilters; ++layer)
     {
         for (int i = 0; i < ALen; ++i)
         {
-            output2[i]=output_conv2d_10[i+ALen*layer];
+            output2[i]=output_conv2d_13[i+ALen*layer];
         }
         cout<<"*****************************************"<<endl;
         cout<<"layer:"<<layer<<endl;
@@ -384,7 +483,7 @@ int main(int argc, char const *argv[])
     }
 
     cout<<output_maxp2d_1[128]<<endl;
-//    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    //    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     Remove_NN();
 
 
