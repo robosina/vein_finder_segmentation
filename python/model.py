@@ -38,7 +38,7 @@ def unet(pretrained_weights = None,input_size = (256,256,1)):
     conv6 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(merge6)
     conv6 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(conv6)
 
-    up7 = layers.Conv2D(base*2, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(conv6))
+    up7 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(layers.UpSampling2D(size = (2,2),interpolation='nearest')(conv6))
     merge7 = layers.concatenate([conv3,up7], axis = 3)
     conv7 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(merge7)
     conv7 = layers.Conv2D(base*4, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(conv7)

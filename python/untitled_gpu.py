@@ -825,21 +825,678 @@ data[2,2]=0.9
 data[255,255]=0.1
 data=np.expand_dims(data,0)
 data=np.expand_dims(data,3)
-intermediate_conv2d_12 = intermediate_layer_model.predict(data)
-intermediate_conv2d_12 = np.squeeze(intermediate_conv2d_12)  #get rid of batch size
-w_conv2d_12=model.layers[layer_num].get_weights()[0]
-weight_matrix_12=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+intermediate_conv2d_13 = intermediate_layer_model.predict(data)
+intermediate_conv2d_13 = np.squeeze(intermediate_conv2d_13)  #get rid of batch size
+w_conv2d_13=model.layers[layer_num].get_weights()[0]
+weight_matrix_13=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
 for i in range(0,nfilters):
-    plane=w_conv2d_12[:,:,:,i]
+    plane=w_conv2d_13[:,:,:,i]
     each_volume=np.empty( shape=(0, 0),dtype='float32' )
     for j in range(0,filter_depth):
         plane2=plane[:,:,j]
         p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
         each_volume=np.append(each_volume,p_reshape)
-    weight_matrix_12[i,:]=each_volume
-np.savetxt(save_path+'conv2d_12_weights.txt',weight_matrix_12,delimiter=',')
+    weight_matrix_13[i,:]=each_volume
+np.savetxt(save_path+'conv2d_13_weights.txt',weight_matrix_13,delimiter=',')
 
-conv2d_12_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
-np.savetxt(save_path+'conv2d_12_bias.txt',conv2d_12_bias,delimiter=',')
+conv2d_13_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_13_bias.txt',conv2d_13_bias,delimiter=',')
 
-w_conv2d_12_first_layer=np.squeeze(w_conv2d_12[:,:,:,0]) 
+w_conv2d_13_first_layer=np.squeeze(w_conv2d_13[:,:,:,0]) 
+#%%
+layer_name = 'up_sampling2d_2'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_up2d_2 = intermediate_layer_model.predict(data)
+intermediate_up2d_2 = np.squeeze(intermediate_up2d_2)
+#%%
+layer_num=23
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+nfilters=64   # change this
+filter_depth=64
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_14 = intermediate_layer_model.predict(data)
+intermediate_conv2d_14 = np.squeeze(intermediate_conv2d_14)  #get rid of batch size
+w_conv2d_14=model.layers[layer_num].get_weights()[0]
+weight_matrix_14=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_14[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_14[i,:]=each_volume
+np.savetxt(save_path+'conv2d_14_weights.txt',weight_matrix_14,delimiter=',')
+
+conv2d_14_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_14_bias.txt',conv2d_14_bias,delimiter=',')
+
+w_conv2d_14_first_layer=np.squeeze(w_conv2d_14[:,:,:,0]) 
+#%%
+layer_name = 'concatenate_2'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_con_2 = intermediate_layer_model.predict(data)
+intermediate_con_2 = np.squeeze(intermediate_con_2)
+#%%
+layer_num=25
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+nfilters=64   # change this
+filter_depth=128
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_15 = intermediate_layer_model.predict(data)
+intermediate_conv2d_15 = np.squeeze(intermediate_conv2d_15)  #get rid of batch size
+w_conv2d_15=model.layers[layer_num].get_weights()[0]
+weight_matrix_15=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_15[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_15[i,:]=each_volume
+np.savetxt(save_path+'conv2d_15_weights.txt',weight_matrix_15,delimiter=',')
+
+conv2d_15_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_15_bias.txt',conv2d_15_bias,delimiter=',')
+
+w_conv2d_15_first_layer=np.squeeze(w_conv2d_15[:,:,:,0]) 
+#%%
+#%%
+layer_num=26
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+nfilters=64   # change this
+filter_depth=64
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_16 = intermediate_layer_model.predict(data)
+intermediate_conv2d_16 = np.squeeze(intermediate_conv2d_16)  #get rid of batch size
+w_conv2d_16=model.layers[layer_num].get_weights()[0]
+weight_matrix_16=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_16[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_16[i,:]=each_volume
+np.savetxt(save_path+'conv2d_16_weights.txt',weight_matrix_16,delimiter=',')
+
+conv2d_16_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_16_bias.txt',conv2d_16_bias,delimiter=',')
+
+w_conv2d_16_first_layer=np.squeeze(w_conv2d_16[:,:,:,0]) 
+
+#%%
+layer_name = 'up_sampling2d_3'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_up2d_3 = intermediate_layer_model.predict(data)
+intermediate_up2d_3 = np.squeeze(intermediate_up2d_3)
+#%%
+layer_num=28
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+nfilters=32   # change this
+filter_depth=64
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_17 = intermediate_layer_model.predict(data)
+intermediate_conv2d_17 = np.squeeze(intermediate_conv2d_17)  #get rid of batch size
+w_conv2d_17=model.layers[layer_num].get_weights()[0]
+weight_matrix_17=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_17[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_17[i,:]=each_volume
+np.savetxt(save_path+'conv2d_17_weights.txt',weight_matrix_17,delimiter=',')
+
+conv2d_17_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_17_bias.txt',conv2d_17_bias,delimiter=',')
+
+w_conv2d_17_first_layer=np.squeeze(w_conv2d_17[:,:,:,0]) 
+#%%
+layer_name = 'concatenate_3'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_con_3 = intermediate_layer_model.predict(data)
+intermediate_con_3 = np.squeeze(intermediate_con_3)
+#%%
+layer_num=30
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+nfilters=32   # change this
+filter_depth=64
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_18 = intermediate_layer_model.predict(data)
+intermediate_conv2d_18 = np.squeeze(intermediate_conv2d_18)  #get rid of batch size
+w_conv2d_18=model.layers[layer_num].get_weights()[0]
+weight_matrix_18=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_18[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_18[i,:]=each_volume
+np.savetxt(save_path+'conv2d_18_weights.txt',weight_matrix_18,delimiter=',')
+
+conv2d_18_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_18_bias.txt',conv2d_18_bias,delimiter=',')
+
+w_conv2d_18_first_layer=np.squeeze(w_conv2d_18[:,:,:,0]) 
+#%%
+layer_num=31
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+nfilters=32   # change this
+filter_depth=32
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_19 = intermediate_layer_model.predict(data)
+intermediate_conv2d_19 = np.squeeze(intermediate_conv2d_19)  #get rid of batch size
+w_conv2d_19=model.layers[layer_num].get_weights()[0]
+weight_matrix_19=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_19[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_19[i,:]=each_volume
+np.savetxt(save_path+'conv2d_19_weights.txt',weight_matrix_19,delimiter=',')
+
+conv2d_19_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_19_bias.txt',conv2d_19_bias,delimiter=',')
+
+w_conv2d_19_first_layer=np.squeeze(w_conv2d_19[:,:,:,0]) 
+#%%
+layer_name = 'up_sampling2d_4'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_up2d_4 = intermediate_layer_model.predict(data)
+intermediate_up2d_4 = np.squeeze(intermediate_up2d_4)
+#%%
+layer_num=33
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+nfilters=16   # change this
+filter_depth=32
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_20 = intermediate_layer_model.predict(data)
+intermediate_conv2d_20 = np.squeeze(intermediate_conv2d_20)  #get rid of batch size
+w_conv2d_20=model.layers[layer_num].get_weights()[0]
+weight_matrix_20=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_20[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_20[i,:]=each_volume
+np.savetxt(save_path+'conv2d_20_weights.txt',weight_matrix_20,delimiter=',')
+
+conv2d_20_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_20_bias.txt',conv2d_20_bias,delimiter=',')
+
+w_conv2d_19_first_layer=np.squeeze(w_conv2d_19[:,:,:,0]) 
+#%%
+layer_name = 'concatenate_4'
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_con_4 = intermediate_layer_model.predict(data)
+intermediate_con_4 = np.squeeze(intermediate_con_4)
+#%%
+layer_num=35
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+model.layers[layer_num].get_weights()[0].shape
+nfilters=16   # change this
+filter_depth=32
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_21 = intermediate_layer_model.predict(data)
+intermediate_conv2d_21 = np.squeeze(intermediate_conv2d_21)  #get rid of batch size
+w_conv2d_21=model.layers[layer_num].get_weights()[0]
+weight_matrix_21=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_21[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_21[i,:]=each_volume
+np.savetxt(save_path+'conv2d_21_weights.txt',weight_matrix_21,delimiter=',')
+
+conv2d_21_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_21_bias.txt',conv2d_21_bias,delimiter=',')
+
+w_conv2d_21_first_layer=np.squeeze(w_conv2d_21[:,:,:,0]) 
+#%%
+#%%
+layer_num=36
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+model.layers[layer_num].get_weights()[0].shape
+nfilters=16   # change this
+filter_depth=16
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_22 = intermediate_layer_model.predict(data)
+intermediate_conv2d_22 = np.squeeze(intermediate_conv2d_22)  #get rid of batch size
+w_conv2d_22=model.layers[layer_num].get_weights()[0]
+weight_matrix_22=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_22[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_22[i,:]=each_volume
+np.savetxt(save_path+'conv2d_22_weights.txt',weight_matrix_22,delimiter=',')
+
+conv2d_22_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_22_bias.txt',conv2d_22_bias,delimiter=',')
+
+w_conv2d_22_first_layer=np.squeeze(w_conv2d_22[:,:,:,0]) 
+#%%
+layer_num=37
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+model.layers[layer_num].get_weights()[0].shape
+nfilters=2   # change this
+filter_depth=16
+filter_size=3
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_23 = intermediate_layer_model.predict(data)
+intermediate_conv2d_23 = np.squeeze(intermediate_conv2d_23)  #get rid of batch size
+w_conv2d_23=model.layers[layer_num].get_weights()[0]
+weight_matrix_23=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_23[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_23[i,:]=each_volume
+np.savetxt(save_path+'conv2d_23_weights.txt',weight_matrix_23,delimiter=',')
+
+conv2d_23_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_23_bias.txt',conv2d_23_bias,delimiter=',')
+
+w_conv2d_23_first_layer=np.squeeze(w_conv2d_23[:,:,:,0]) 
+#%%
+layer_num=38
+for i in range(0,1):
+	print(model.layers[layer_num].name)
+model.layers[layer_num].get_weights()[0].shape
+nfilters=1   # change this
+filter_depth=2
+filter_size=1
+layer_name = model.layers[layer_num].name
+intermediate_layer_model = Model(inputs=model.input,
+                                 outputs=model.get_layer(layer_name).output)
+import cv2
+data=cv2.imread(img_path)
+data=cv2.cvtColor(data,cv2.COLOR_BGR2GRAY)
+data=cv2.resize(data,(256,256))
+data=np.array(data,dtype='float32')
+data=data/255
+data[0,0]=0.1
+data[0,1]=0.2
+data[0,2]=0.3
+data[1,0]=0.4
+data[1,1]=0.5
+data[1,2]=0.6
+data[2,0]=0.7
+data[2,1]=0.8
+data[2,2]=0.9
+data[255,255]=0.1
+data=np.expand_dims(data,0)
+data=np.expand_dims(data,3)
+intermediate_conv2d_23 = intermediate_layer_model.predict(data)
+intermediate_conv2d_23 = np.squeeze(intermediate_conv2d_23)  #get rid of batch size
+w_conv2d_23=model.layers[layer_num].get_weights()[0]
+weight_matrix_23=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+for i in range(0,nfilters):
+    plane=w_conv2d_23[:,:,:,i]
+    each_volume=np.empty( shape=(0, 0),dtype='float32' )
+    for j in range(0,filter_depth):
+        plane2=plane[:,:,j]
+        p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
+        each_volume=np.append(each_volume,p_reshape)
+    weight_matrix_23[i,:]=each_volume
+np.savetxt(save_path+'conv2d_23_weights.txt',weight_matrix_23,delimiter=',')
+
+conv2d_23_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_23_bias.txt',conv2d_23_bias,delimiter=',')
+
+w_conv2d_23_first_layer=np.squeeze(w_conv2d_23[:,:,:,0]) 
