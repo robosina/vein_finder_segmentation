@@ -54,7 +54,7 @@ model = unet()
 ## outputs:  ['dense_4/Sigmoid']
 #print('outputs: ', [output.op.name for output in model.outputs])
 #model.save('./HODA3.h5')
-model.load_weights('/home/nict/unet-master/HODA3.h5')
+model.load_weights('./HODA3.h5')
 #
 #frozen_graph = freeze_session(tf.keras.backend.get_session(), output_names=[out.op.name for out in model.outputs])
 #tf.train.write_graph(frozen_graph, './', 'ocr4.pbtxt', as_text=True)
@@ -70,8 +70,8 @@ model.load_weights('/home/nict/unet-master/HODA3.h5')
 #results = model.predict_generator(testGene,30,verbose=1)
 #saveResult("data/membrane/test",results)
 #%%
-img_path='/home/nict/isv/Ta/2/47.JPG'
-save_path='/home/nict/plate_finder_section/programs/cuda_c_code/5/weights/'
+img_path='/home/saeed/Desktop/11.jpg'
+save_path='/home/saeed/CUDA_IN_QT-master/first_layer/weights/'
 img=cv2.imread(img_path)
 #plt.imshow(img,cmap='gray')
 img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -85,24 +85,24 @@ out=model.predict(img)
 out=np.squeeze(out)
 fig=plt.figure(figsize=(4,4))
 plt.imshow(out)
-print(time.time()-t1)
-out=np.abs(1-np.squeeze(out))
-plt.figure()
-fig=plt.figure(figsize=(8,8))
-plt.imshow(out,cmap='gray')
-fig=plt.figure(figsize=(8,8))
-plt.subplot(1,2,1)
-plt.imshow(np.squeeze(img),cmap='gray')
-plt.subplot(1,2,2)
-img=np.squeeze(img)
-for row in range(0,256):
-    for col in range(0,256):
-        if(out[row,col]>0.01):
-            img[row,col]=0+0.3*img[row,col]
-            
-# img=np.squeeze(img)-30*out
-plt.imshow(img,cmap='gray')
-cv2.imwrite('/home/nict/Desktop/1.jpg',img)
+#print(time.time()-t1)
+#out=np.abs(1-np.squeeze(out))
+#plt.figure()
+#fig=plt.figure(figsize=(8,8))
+#plt.imshow(out,cmap='gray')
+#fig=plt.figure(figsize=(8,8))
+#plt.subplot(1,2,1)
+#plt.imshow(np.squeeze(img),cmap='gray')
+#plt.subplot(1,2,2)
+#img=np.squeeze(img)
+#for row in range(0,256):
+#    for col in range(0,256):
+#        if(out[row,col]>0.01):
+#            img[row,col]=0+0.3*img[row,col]
+#            
+## img=np.squeeze(img)-30*out
+#plt.imshow(img,cmap='gray')
+#cv2.imwrite('/home/nict/Desktop/1.jpg',img)
 #%%    conv2d_1
 from keras.models import Model
 layer_name = 'conv2d_1'
@@ -1482,21 +1482,21 @@ data[2,2]=0.9
 data[255,255]=0.1
 data=np.expand_dims(data,0)
 data=np.expand_dims(data,3)
-intermediate_conv2d_23 = intermediate_layer_model.predict(data)
-intermediate_conv2d_23 = np.squeeze(intermediate_conv2d_23)  #get rid of batch size
-w_conv2d_23=model.layers[layer_num].get_weights()[0]
-weight_matrix_23=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
+intermediate_conv2d_24 = intermediate_layer_model.predict(data)
+intermediate_conv2d_24 = np.squeeze(intermediate_conv2d_24)  #get rid of batch size
+w_conv2d_24=model.layers[layer_num].get_weights()[0]
+weight_matrix_24=np.zeros((nfilters,filter_depth*filter_size*filter_size),dtype='float32')
 for i in range(0,nfilters):
-    plane=w_conv2d_23[:,:,:,i]
+    plane=w_conv2d_24[:,:,:,i]
     each_volume=np.empty( shape=(0, 0),dtype='float32' )
     for j in range(0,filter_depth):
         plane2=plane[:,:,j]
         p_reshape=np.expand_dims(np.squeeze(np.reshape(plane2,[1,filter_size*filter_size])),1)
         each_volume=np.append(each_volume,p_reshape)
-    weight_matrix_23[i,:]=each_volume
-np.savetxt(save_path+'conv2d_23_weights.txt',weight_matrix_23,delimiter=',')
+    weight_matrix_24[i,:]=each_volume
+np.savetxt(save_path+'conv2d_24_weights.txt',weight_matrix_24,delimiter=',')
 
-conv2d_23_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
-np.savetxt(save_path+'conv2d_23_bias.txt',conv2d_23_bias,delimiter=',')
+conv2d_24_bias=np.expand_dims(model.layers[layer_num].get_weights()[1],0)
+np.savetxt(save_path+'conv2d_24_bias.txt',conv2d_24_bias,delimiter=',')
 
-w_conv2d_23_first_layer=np.squeeze(w_conv2d_23[:,:,:,0]) 
+w_conv2d_24_first_layer=np.squeeze(w_conv2d_23[:,:,:,0]) 
