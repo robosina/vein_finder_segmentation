@@ -34,15 +34,15 @@ conv2d_10 (Conv2D)              (None, 16, 16, 128)     **DONE**
 
 dropout_2 (Dropout)             (None, 16, 16, 128)     **DONE**
 
-up_sampling2d_1 (UpSampling2D)  (None, 32, 32, 128) 
+up_sampling2d_1 (UpSampling2D)  (None, 32, 32, 128)     **DONE**
 
-conv2d_11 (Conv2D)              (None, 32, 32, 64)
+conv2d_11 (Conv2D)              (None, 32, 32, 64)      **DONE**
 
-concatenate_1 (Concatenate)     (None, 32, 32, 128)
+concatenate_1 (Concatenate)     (None, 32, 32, 128)     **DONE**
 
-conv2d_12 (Conv2D)              (None, 32, 32, 64)
+conv2d_12 (Conv2D)              (None, 32, 32, 64)      **DONE**
 
-conv2d_13 (Conv2D)              (None, 32, 32, 64)
+conv2d_13 (Conv2D)              (None, 32, 32, 64)      **DONE**
 
 up_sampling2d_2 (UpSampling2D)  (None, 64, 64, 64)
 
