@@ -7,6 +7,7 @@ using namespace cv;
 #include <layer.h>
 #include <vector>
 #include <thread>
+#include <QImage>
 
 QString exe_path;
 using namespace std;
@@ -618,7 +619,7 @@ layer initialize_conv2d_22_layer()
 layer initialize_conv2d_23_layer()
 {
     layer l;
-    l.depth=32;
+    l.depth=16;
     l.width=3;
     l.height=3;
     l.nfilters=2;
@@ -647,7 +648,7 @@ layer initialize_conv2d_24_layer()
 }
 int main(int argc, char const *argv[])
 {
-    exe_path="/home/nict/plate_finder_section/programs/cuda_c_code/5/weights/";
+    exe_path="/home/saeed/CUDA_IN_QT-master/first_layer/weights/";
     cout<<exe_path.toStdString()<<endl;
     Mat img(256,256,CV_32FC1);
     QFile file1(exe_path+"c1.txt"); file1.open(QIODevice::ReadWrite); QTextStream in1(&file1);
@@ -697,7 +698,7 @@ int main(int argc, char const *argv[])
     layer l_conv2d_21=initialize_conv2d_21_layer();
     layer l_conv2d_22=initialize_conv2d_22_layer();
     layer l_conv2d_23=initialize_conv2d_23_layer();
-//    layer l_conv2d_24=initialize_conv2d_24_layer();
+    layer l_conv2d_24=initialize_conv2d_24_layer();
 
 
     enum LAYER layer_type;
@@ -736,7 +737,7 @@ int main(int argc, char const *argv[])
     layer_type=CONV2D_21;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_21);
     layer_type=CONV2D_22;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_22);
     layer_type=CONV2D_23;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_23);
-//    layer_type=CONV2D_24;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_24);
+    layer_type=CONV2D_24;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_24);
 
     float* output;
     float* output_conv2d_2;
@@ -773,7 +774,7 @@ int main(int argc, char const *argv[])
     float* output_conv2d_21;
     float* output_conv2d_22;
     float* output_conv2d_23;
-//    float* output_conv2d_24;
+    float* output_conv2d_24;
 
 
     conv2d_1(img.ptr<float>(0),&output,img.cols,img.rows,l_conv2d_1);
@@ -815,21 +816,31 @@ int main(int argc, char const *argv[])
     Size OShape(l_conv2d_23.im_w,l_conv2d_23.im_h);   //output shape
     int ALen=OShape.area();  //array length
     float* output2=(float*)malloc(ALen*sizeof (float));
+    vector<Mat> imgs;
     for (int layer = 0; layer < l_conv2d_23.nfilters; ++layer)
     {
         for (int i = 0; i < ALen; ++i)
         {
             output2[i]=output_conv2d_23[i+ALen*layer];
         }
-        cout<<"*****************************************"<<endl;
-        cout<<"layer:"<<layer<<endl;
-        cout<<"*****************************************"<<endl;
         cv::Mat output_img(OShape.width,OShape.height,CV_32F,output2);
-        cout<<output_img.rowRange(0,8).colRange(0,8)<<endl;
+        imgs.push_back(output_img.clone());
     }
 
-    cout<<output_maxp2d_1[128]<<endl;
-    //    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    cout<<imgs[0].rowRange(0,5).colRange(0,5)<<endl;
+    cout<<imgs[1].rowRange(0,5).colRange(0,5)<<endl;
+    Mat final_img=0.567117*imgs[0]+0.143773*imgs[1]-0.34974435;
+    for (int r = 0; r < final_img.rows; ++r) {
+        for (int c = 0; c < final_img.cols; ++c) {
+            final_img.at<float>(r,c)=1/(1+cv::exp(-final_img.at<float>(r,c)));
+        }
+    }
+    cv::normalize(final_img,final_img,255,0,NORM_MINMAX);
+    final_img.convertTo(final_img,CV_8U);
+
+    cout<<final_img.rowRange(0,25).colRange(0,25)<<endl;
+    QImage imgp((uchar*)final_img.data,final_img.cols,final_img.rows,QImage::Format_Grayscale8);
+    imgp.save("/home/saeed/CUDA_IN_QT-master/first_layer/1_1.jpg");
     Remove_NN();
 
 

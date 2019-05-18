@@ -274,6 +274,7 @@ __global__ void CONV2D_2_GPU1(float *input_image, float *output_image, float *Ke
     }
 }
 
+
 __global__ void MAXP2D_GPU(float *input_image, float *output_image,int nx, int ny,int layer)
 {
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
