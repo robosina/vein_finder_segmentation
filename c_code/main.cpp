@@ -99,40 +99,40 @@ vector<float> bias_conv2d_23;      //37th layer
 vector<float> weights_conv2d_24;   //38th layer
 vector<float> bias_conv2d_24;      //38th layer
 
-extern "C" void conv2d_1(float* img_ptr,float** output,int w,int h,layer l);
-extern "C" void conv2d_2(float** output,int w,int h,layer l);
-extern "C" void maxp2d_1(float** output,int w,int h,layer l);
-extern "C" void conv2d_3(float** output,int w,int h,layer l);
-extern "C" void conv2d_4(float** output,int w,int h,layer l);
-extern "C" void maxp2d_2(float** output, int w, int h, layer l);
-extern "C" void conv2d_5(float** output, int w, int h, layer l);
-extern "C" void conv2d_6(float** output, int w, int h, layer l);
-extern "C" void maxp2d_3(float** output, int w, int h, layer l);
-extern "C" void conv2d_7(float** output, int w, int h, layer l);
-extern "C" void conv2d_8(float** output, int w, int h, layer l);
-extern "C" void maxp2d_4(float** output, int w, int h, layer l);
-extern "C" void conv2d_9(float** output, int w, int h, layer l);
-extern "C" void conv2d_10(float** output, int w, int h, layer l);
-extern "C" void upsample_2d_1(float** output, int w, int h, layer l);
-extern "C" void conv2d_11(float** output, int w, int h, layer l);
-extern "C" void concat_1(float** output, int w, int h, layer l);
-extern "C" void conv2d_12(float** output, int w, int h, layer l);
-extern "C" void conv2d_13(float** output, int w, int h, layer l);
-extern "C" void upsample_2d_2(float** output, int w, int h, layer l);
-extern "C" void conv2d_14(float** output, int w, int h, layer l);
-extern "C" void concat_2(float** output, int w, int h, layer l);
-extern "C" void conv2d_15(float** output, int w, int h, layer l);
-extern "C" void conv2d_16(float** output, int w, int h, layer l);
-extern "C" void upsample_2d_3(float** output, int w, int h, layer l);
-extern "C" void conv2d_17(float** output, int w, int h, layer l);
-extern "C" void concat_3(float** output, int w, int h, layer l);
-extern "C" void conv2d_18(float** output, int w, int h, layer l);
-extern "C" void conv2d_19(float** output, int w, int h, layer l);
-extern "C" void upsample_2d_4(float** output, int w, int h, layer l);
-extern "C" void conv2d_20(float** output, int w, int h, layer l);
-extern "C" void concat_4(float** output, int w, int h, layer l);
-extern "C" void conv2d_21(float** output, int w, int h, layer l);
-extern "C" void conv2d_22(float** output, int w, int h, layer l);
+extern "C" void conv2d_1(float* img_ptr,int w,int h,layer l);
+extern "C" void conv2d_2(int w,int h,layer l);
+extern "C" void maxp2d_1(int w,int h,layer l);
+extern "C" void conv2d_3(int w,int h,layer l);
+extern "C" void conv2d_4(int w,int h,layer l);
+extern "C" void maxp2d_2(int w, int h, layer l);
+extern "C" void conv2d_5(int w, int h, layer l);
+extern "C" void conv2d_6(int w, int h, layer l);
+extern "C" void maxp2d_3(int w, int h, layer l);
+extern "C" void conv2d_7(int w, int h, layer l);
+extern "C" void conv2d_8(int w, int h, layer l);
+extern "C" void maxp2d_4(int w, int h, layer l);
+extern "C" void conv2d_9(int w, int h, layer l);
+extern "C" void conv2d_10(int w, int h, layer l);
+extern "C" void upsample_2d_1(int w, int h, layer l);
+extern "C" void conv2d_11(int w, int h, layer l);
+extern "C" void concat_1(int w, int h, layer l);
+extern "C" void conv2d_12(int w, int h, layer l);
+extern "C" void conv2d_13(int w, int h, layer l);
+extern "C" void upsample_2d_2( int w, int h, layer l);
+extern "C" void conv2d_14( int w, int h, layer l);
+extern "C" void concat_2( int w, int h, layer l);
+extern "C" void conv2d_15(int w, int h, layer l);
+extern "C" void conv2d_16(int w, int h, layer l);
+extern "C" void upsample_2d_3( int w, int h, layer l);
+extern "C" void conv2d_17( int w, int h, layer l);
+extern "C" void concat_3(int w, int h, layer l);
+extern "C" void conv2d_18(int w, int h, layer l);
+extern "C" void conv2d_19(int w, int h, layer l);
+extern "C" void upsample_2d_4(int w, int h, layer l);
+extern "C" void conv2d_20(int w, int h, layer l);
+extern "C" void concat_4(int w, int h, layer l);
+extern "C" void conv2d_21(int w, int h, layer l);
+extern "C" void conv2d_22(int w, int h, layer l);
 extern "C" void conv2d_23(float** output, int w, int h, layer l);
 extern "C" void conv2d_24(float** output, int w, int h, layer l);
 
@@ -739,80 +739,47 @@ int main(int argc, char const *argv[])
     layer_type=CONV2D_23;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_23);
     layer_type=CONV2D_24;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_24);
 
-    float* output;
-    float* output_conv2d_2;
-    float* output_maxp2d_1;
-    float* output_conv2d_3;
-    float* output_conv2d_4;
-    float* output_maxp2d_2;
-    float* output_conv2d_5;
-    float* output_conv2d_6;
-    float* output_maxp2d_3;
-    float* output_conv2d_7;
-    float* output_conv2d_8;
-    float* output_maxp2d_4;
-    float* output_conv2d_9;
-    float* output_conv2d_10;
-    float* output_upsm2d_1;
-    float* output_conv2d_11;
-    float* output_concat_1;
-    float* output_conv2d_12;
-    float* output_conv2d_13;
-    float* output_upsm2d_2;
-    float* output_conv2d_14;
-    float* output_concat_2;
-    float* output_conv2d_15;
-    float* output_conv2d_16;
-    float* output_upsm2d_3;
-    float* output_conv2d_17;
-    float* output_concat_3;
-    float* output_conv2d_18;
-    float* output_conv2d_19;
-    float* output_upsm2d_4;
-    float* output_conv2d_20;
-    float* output_concat_4;
-    float* output_conv2d_21;
-    float* output_conv2d_22;
     float* output_conv2d_23;
-    float* output_conv2d_24;
 
-
-    conv2d_1(img.ptr<float>(0),&output,img.cols,img.rows,l_conv2d_1);
-    conv2d_2(&output_conv2d_2,img.cols,img.rows,l_conv2d_2);
-    maxp2d_1(&output_maxp2d_1,img.cols/2,img.rows/2,l_maxp2d_1);
-    conv2d_3(&output_conv2d_3,img.cols/2,img.rows/2,l_conv2d_3);
-    conv2d_4(&output_conv2d_4,img.cols/2,img.rows/2,l_conv2d_4);
-    maxp2d_2(&output_maxp2d_2,img.cols/4,img.rows/4,l_maxp2d_2);
-    conv2d_5(&output_conv2d_5,img.cols/4,img.rows/4,l_conv2d_5);
-    conv2d_6(&output_conv2d_6,img.cols/4,img.rows/4,l_conv2d_6);
-    maxp2d_3(&output_maxp2d_3,img.cols/8,img.rows/8,l_maxp2d_3);
-    conv2d_7(&output_conv2d_7,img.cols/8,img.rows/8,l_conv2d_7);
-    conv2d_8(&output_conv2d_8,img.cols/8,img.rows/8,l_conv2d_8);
-    maxp2d_4(&output_maxp2d_4,img.cols/16,img.rows/16,l_maxp2d_4);
-    conv2d_9(&output_conv2d_9,img.cols/16,img.rows/16,l_conv2d_9);
-    conv2d_10(&output_conv2d_10,img.cols/16,img.rows/16,l_conv2d_10);
-    upsample_2d_1(&output_upsm2d_1,img.cols/8,img.cols/8,l_upsm2d_1);
-    conv2d_11(&output_conv2d_11,img.cols/8,img.rows/8,l_conv2d_11);
-    concat_1(&output_concat_1,img.cols/8,img.cols/8,l_concat_1);
-    conv2d_12(&output_conv2d_12,img.cols/8,img.cols/8,l_conv2d_12);
-    conv2d_13(&output_conv2d_13,img.cols/8,img.cols/8,l_conv2d_13);
-    upsample_2d_2(&output_upsm2d_2,img.cols/4,img.cols/4,l_upsm2d_2);
-    conv2d_14(&output_conv2d_14,img.cols/4,img.cols/4,l_conv2d_14);
-    concat_2(&output_concat_2,img.cols/4,img.cols/4,l_concat_2);
-    conv2d_15(&output_conv2d_15,img.cols/4,img.cols/4,l_conv2d_15);
-    conv2d_16(&output_conv2d_16,img.cols/4,img.cols/4,l_conv2d_16);
-    upsample_2d_3(&output_upsm2d_3,img.cols/2,img.cols/2,l_upsm2d_3);
-    conv2d_17(&output_conv2d_17,img.cols/2,img.cols/2,l_conv2d_17);
-    concat_3(&output_concat_3,img.cols/2,img.cols/2,l_concat_3);
-    conv2d_18(&output_conv2d_18,img.cols/2,img.cols/2,l_conv2d_18);
-    conv2d_19(&output_conv2d_19,img.cols/2,img.cols/2,l_conv2d_19);
-    upsample_2d_4(&output_upsm2d_4,img.cols,img.cols,l_upsm2d_4);
-    conv2d_20(&output_conv2d_20,img.cols,img.cols,l_conv2d_20);
-    concat_4(&output_concat_4,img.cols,img.cols,l_concat_4);
-    conv2d_21(&output_conv2d_21,img.cols,img.cols,l_conv2d_21);
-    conv2d_22(&output_conv2d_22,img.cols,img.cols,l_conv2d_22);
-    conv2d_23(&output_conv2d_23,img.cols,img.cols,l_conv2d_23);
-
+    for (int i = 0; i < 1; ++i) {
+        double t1=getTickCount();
+        conv2d_1(img.ptr<float>(0),img.cols,img.rows,l_conv2d_1);
+        conv2d_2(img.cols,img.rows,l_conv2d_2);
+        maxp2d_1(img.cols/2,img.rows/2,l_maxp2d_1);
+        conv2d_3(img.cols/2,img.rows/2,l_conv2d_3);
+        conv2d_4(img.cols/2,img.rows/2,l_conv2d_4);
+        maxp2d_2(img.cols/4,img.rows/4,l_maxp2d_2);
+        conv2d_5(img.cols/4,img.rows/4,l_conv2d_5);
+        conv2d_6(img.cols/4,img.rows/4,l_conv2d_6);
+        maxp2d_3(img.cols/8,img.rows/8,l_maxp2d_3);
+        conv2d_7(img.cols/8,img.rows/8,l_conv2d_7);
+        conv2d_8(img.cols/8,img.rows/8,l_conv2d_8);
+        maxp2d_4(img.cols/16,img.rows/16,l_maxp2d_4);
+        conv2d_9(img.cols/16,img.rows/16,l_conv2d_9);
+        conv2d_10(img.cols/16,img.rows/16,l_conv2d_10);
+        upsample_2d_1(img.cols/8,img.cols/8,l_upsm2d_1);
+        conv2d_11(img.cols/8,img.rows/8,l_conv2d_11);
+        concat_1(img.cols/8,img.cols/8,l_concat_1);
+        conv2d_12(img.cols/8,img.cols/8,l_conv2d_12);
+        conv2d_13(img.cols/8,img.cols/8,l_conv2d_13);
+        upsample_2d_2(img.cols/4,img.cols/4,l_upsm2d_2);
+        conv2d_14(img.cols/4,img.cols/4,l_conv2d_14);
+        concat_2(img.cols/4,img.cols/4,l_concat_2);
+        conv2d_15(img.cols/4,img.cols/4,l_conv2d_15);
+        conv2d_16(img.cols/4,img.cols/4,l_conv2d_16);
+        upsample_2d_3(img.cols/2,img.cols/2,l_upsm2d_3);
+        conv2d_17(img.cols/2,img.cols/2,l_conv2d_17);
+        concat_3(img.cols/2,img.cols/2,l_concat_3);
+        conv2d_18(img.cols/2,img.cols/2,l_conv2d_18);
+        conv2d_19(img.cols/2,img.cols/2,l_conv2d_19);
+        upsample_2d_4(img.cols,img.cols,l_upsm2d_4);
+        conv2d_20(img.cols,img.cols,l_conv2d_20);
+        concat_4(img.cols,img.cols,l_concat_4);
+        conv2d_21(img.cols,img.cols,l_conv2d_21);
+        conv2d_22(img.cols,img.cols,l_conv2d_22);
+        conv2d_23(&output_conv2d_23,img.cols,img.cols,l_conv2d_23);
+        cout<<"time:"<<(getTickCount()-t1)/getTickFrequency()<<endl;
+    }
     Size OShape(l_conv2d_23.im_w,l_conv2d_23.im_h);   //output shape
     int ALen=OShape.area();  //array length
     float* output2=(float*)malloc(ALen*sizeof (float));
@@ -836,14 +803,16 @@ int main(int argc, char const *argv[])
         }
     }
 
-    return 0;
     cv::normalize(final_img,final_img,255,0,NORM_MINMAX);
     final_img.convertTo(final_img,CV_8U);
+    imshow("final_image",final_img);
+    waitKey(0);
+    return 0;
 
     cv::normalize(img,img,255,0,NORM_MINMAX);
     img.convertTo(img,CV_8U);
 
-    imshow("final_image",final_img);
+
     imshow("first_image",img);
 
     Mat added_image(256,256,CV_8U);
