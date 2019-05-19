@@ -835,9 +835,33 @@ int main(int argc, char const *argv[])
             final_img.at<float>(r,c)=1/(1+cv::exp(-final_img.at<float>(r,c)));
         }
     }
+
+    return 0;
     cv::normalize(final_img,final_img,255,0,NORM_MINMAX);
     final_img.convertTo(final_img,CV_8U);
 
+    cv::normalize(img,img,255,0,NORM_MINMAX);
+    img.convertTo(img,CV_8U);
+
+    imshow("final_image",final_img);
+    imshow("first_image",img);
+
+    Mat added_image(256,256,CV_8U);
+    for (int r = 0; r < 256; ++r) {
+        for(int c=0;c<256;c++)
+        {
+            if(final_img.at<uchar>(r,c)<200)
+            {
+                added_image.at<uchar>(r,c)=(final_img.at<uchar>(r,c)/2+img.at<uchar>(r,c)/2);
+            }
+            else
+            {
+                added_image.at<uchar>(r,c)=img.at<uchar>(r,c);
+            }
+        }
+    }
+    imshow("added image",added_image);
+    waitKey(0);
     cout<<final_img.rowRange(0,25).colRange(0,25)<<endl;
     QImage imgp((uchar*)final_img.data,final_img.cols,final_img.rows,QImage::Format_Grayscale8);
     imgp.save("/home/saeed/CUDA_IN_QT-master/first_layer/1_1.jpg");
