@@ -70,8 +70,8 @@ model.load_weights('./HODA3.h5')
 #results = model.predict_generator(testGene,30,verbose=1)
 #saveResult("data/membrane/test",results)
 #%%
-img_path='/home/saeed/Desktop/11.jpg'
-save_path='/home/saeed/CUDA_IN_QT-master/first_layer/weights/'
+img_path='/home/nict/isv/picture/2/47.JPG'
+save_path='/home/nict/plate_finder_section/programs/cuda_c_code/5/weights/'
 img=cv2.imread(img_path)
 #plt.imshow(img,cmap='gray')
 img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
