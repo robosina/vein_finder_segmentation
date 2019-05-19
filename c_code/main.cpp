@@ -133,7 +133,7 @@ extern "C" void conv2d_20(int w, int h, layer l);
 extern "C" void concat_4(int w, int h, layer l);
 extern "C" void conv2d_21(int w, int h, layer l);
 extern "C" void conv2d_22(int w, int h, layer l);
-extern "C" void conv2d_23(float** output, int w, int h, layer l);
+extern "C" void conv2d_23(int w, int h, layer l);
 extern "C" void conv2d_24(float** output, int w, int h, layer l);
 
 
@@ -648,7 +648,7 @@ layer initialize_conv2d_24_layer()
 }
 int main(int argc, char const *argv[])
 {
-    exe_path="/home/saeed/CUDA_IN_QT-master/first_layer/weights/";
+    exe_path="/home/nict/plate_finder_section/programs/cuda_c_code/5/weights/";
     cout<<exe_path.toStdString()<<endl;
     Mat img(256,256,CV_32FC1);
     QFile file1(exe_path+"c1.txt"); file1.open(QIODevice::ReadWrite); QTextStream in1(&file1);
@@ -739,10 +739,9 @@ int main(int argc, char const *argv[])
     layer_type=CONV2D_23;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_23);
     layer_type=CONV2D_24;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_24);
 
-    float* output_conv2d_23;
-
-    for (int i = 0; i < 1; ++i) {
+    float* output_conv2d_24 = nullptr;
         double t1=getTickCount();
+
         conv2d_1(img.ptr<float>(0),img.cols,img.rows,l_conv2d_1);
         conv2d_2(img.cols,img.rows,l_conv2d_2);
         maxp2d_1(img.cols/2,img.rows/2,l_maxp2d_1);
@@ -777,63 +776,70 @@ int main(int argc, char const *argv[])
         concat_4(img.cols,img.cols,l_concat_4);
         conv2d_21(img.cols,img.cols,l_conv2d_21);
         conv2d_22(img.cols,img.cols,l_conv2d_22);
-        conv2d_23(&output_conv2d_23,img.cols,img.cols,l_conv2d_23);
-        cout<<"time:"<<(getTickCount()-t1)/getTickFrequency()<<endl;
-    }
-    Size OShape(l_conv2d_23.im_w,l_conv2d_23.im_h);   //output shape
-    int ALen=OShape.area();  //array length
-    float* output2=(float*)malloc(ALen*sizeof (float));
-    vector<Mat> imgs;
-    for (int layer = 0; layer < l_conv2d_23.nfilters; ++layer)
-    {
-        for (int i = 0; i < ALen; ++i)
-        {
-            output2[i]=output_conv2d_23[i+ALen*layer];
-        }
-        cv::Mat output_img(OShape.width,OShape.height,CV_32F,output2);
-        imgs.push_back(output_img.clone());
-    }
+        conv2d_23(img.cols,img.cols,l_conv2d_23);
+        cout<<"final image without transferring data="<<(getTickCount()-t1)/getTickFrequency()<<endl;
+        conv2d_24(&output_conv2d_24,img.cols,img.cols,l_conv2d_24);
+        cout<<"final image time="<<(getTickCount()-t1)/getTickFrequency()<<endl;
+    Mat final_image(256,256,CV_32F,output_conv2d_24);
+    cv::normalize(final_image,final_image,255,0,NORM_MINMAX);
+    final_image.convertTo(final_image,CV_8U);
 
-    cout<<imgs[0].rowRange(0,5).colRange(0,5)<<endl;
-    cout<<imgs[1].rowRange(0,5).colRange(0,5)<<endl;
-    Mat final_img=0.567117*imgs[0]+0.143773*imgs[1]-0.34974435;
-    for (int r = 0; r < final_img.rows; ++r) {
-        for (int c = 0; c < final_img.cols; ++c) {
-            final_img.at<float>(r,c)=1/(1+cv::exp(-final_img.at<float>(r,c)));
-        }
-    }
-
-    cv::normalize(final_img,final_img,255,0,NORM_MINMAX);
-    final_img.convertTo(final_img,CV_8U);
-    imshow("final_image",final_img);
+    imshow("final_img",final_image);
     waitKey(0);
-    return 0;
+    //    return 0;
+    //    Size OShape(l_conv2d_23.im_w,l_conv2d_23.im_h);   //output shape
+    //    int ALen=OShape.area();  //array length
+    //    float* output2=(float*)malloc(ALen*sizeof (float));
+    //    vector<Mat> imgs;
+    //    for (int layer = 0; layer < l_conv2d_23.nfilters; ++layer)
+    //    {
+    //        for (int i = 0; i < ALen; ++i)
+    //        {
+    //            output2[i]=output_conv2d_24[i+ALen*layer];
+    //        }
+    //        cv::Mat output_img(OShape.width,OShape.height,CV_32F,output2);
+    //        imgs.push_back(output_img.clone());
+    //    }
 
-    cv::normalize(img,img,255,0,NORM_MINMAX);
-    img.convertTo(img,CV_8U);
+    //    cout<<imgs[0].rowRange(0,5).colRange(0,5)<<endl;
+    //    cout<<imgs[1].rowRange(0,5).colRange(0,5)<<endl;
+    //    Mat final_img=0.567117*imgs[0]+0.143773*imgs[1]-0.34974435;
+    //    for (int r = 0; r < final_img.rows; ++r) {
+    //        for (int c = 0; c < final_img.cols; ++c) {
+    //            final_img.at<float>(r,c)=1/(1+cv::exp(-final_img.at<float>(r,c)));
+    //        }
+    //    }
 
 
-    imshow("first_image",img);
+    //    imshow("final_image",final_img);
+    //    waitKey(0);
+    //    return 0;
 
-    Mat added_image(256,256,CV_8U);
-    for (int r = 0; r < 256; ++r) {
-        for(int c=0;c<256;c++)
-        {
-            if(final_img.at<uchar>(r,c)<200)
-            {
-                added_image.at<uchar>(r,c)=(final_img.at<uchar>(r,c)/2+img.at<uchar>(r,c)/2);
-            }
-            else
-            {
-                added_image.at<uchar>(r,c)=img.at<uchar>(r,c);
-            }
-        }
-    }
-    imshow("added image",added_image);
-    waitKey(0);
-    cout<<final_img.rowRange(0,25).colRange(0,25)<<endl;
-    QImage imgp((uchar*)final_img.data,final_img.cols,final_img.rows,QImage::Format_Grayscale8);
-    imgp.save("/home/saeed/CUDA_IN_QT-master/first_layer/1_1.jpg");
+    //    cv::normalize(img,img,255,0,NORM_MINMAX);
+    //    img.convertTo(img,CV_8U);
+
+
+    //    imshow("first_image",img);
+
+    //    Mat added_image(256,256,CV_8U);
+    //    for (int r = 0; r < 256; ++r) {
+    //        for(int c=0;c<256;c++)
+    //        {
+    //            if(final_img.at<uchar>(r,c)<200)
+    //            {
+    //                added_image.at<uchar>(r,c)=(final_img.at<uchar>(r,c)/2+img.at<uchar>(r,c)/2);
+    //            }
+    //            else
+    //            {
+    //                added_image.at<uchar>(r,c)=img.at<uchar>(r,c);
+    //            }
+    //        }
+    //    }
+    //    imshow("added image",added_image);
+    //    waitKey(0);
+    //    cout<<final_img.rowRange(0,25).colRange(0,25)<<endl;
+    //    QImage imgp((uchar*)final_img.data,final_img.cols,final_img.rows,QImage::Format_Grayscale8);
+    //    imgp.save("/home/saeed/CUDA_IN_QT-master/first_layer/1_1.jpg");
     Remove_NN();
 
 

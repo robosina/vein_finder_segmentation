@@ -7,9 +7,10 @@
 #include "layer.h"
 #define DEBUG_MODE 0
 #define CPU_DEBUG_MODE 0
+#define print 0
 using namespace std;
 
-enum LAYER
+    enum LAYER
 {
     CONV2D_1,
     CONV2D_2,
@@ -49,7 +50,7 @@ enum LAYER
     CONV2D_24,
 
 
-};
+    };
 
 float time_sum=0;
 //global variables
@@ -175,6 +176,7 @@ float* d_output_24{0};
 float* d_kernel_24{0};
 float* d_bias_24{0};
 
+float* h_output;
 #define checkCUDNN(expression)                               \
   {                                                          \
     cudnnStatus_t status = (expression);                     \
@@ -209,6 +211,11 @@ __device__ float relu(float input)
     }
     return input;
 }
+
+__device__ float sigmoid(float input)
+{
+    return 1/(1+exp(-input));
+}
 __global__ void CONV2DGPU1(float *input_image, float *output_image, float *Kernel,float *bias,
                            int nx, int ny,int layer) {
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
@@ -218,21 +225,65 @@ __global__ void CONV2DGPU1(float *input_image, float *output_image, float *Kerne
     {
         float sum=0;
         int which_layer=layer*9;
-        for (char r = -1; r < 2; ++r)
+        if(iy!=0)
         {
-            for (char c = -1; c < 2; ++c)
+            if(ix!=0)
             {
-                unsigned int idx = (iy+r)*nx + (ix+c);
-                if(!(iy+r==-1 | ix+c==-1 | ix+c==nx | iy+r==ny ))
-                {
-                    sum+=input_image[idx]*Kernel[3*(r+1)+(c+1)+which_layer];
-                    //#if DEBUG_MODE==1
-                    //                    printf("row:%d col:%d Pixel:%f Kernel:%f SUM:%f\n",iy+r,
-                    //                           ix+c,input_image[idx],Kernel[3*(r+1)+(c+1)+layer*9],sum);
-                    //#endif
-                }
+                unsigned int idx11 = (iy-1)*nx + (ix-1);
+                sum+=input_image[idx11]*Kernel[which_layer];
+            }
+
+            unsigned int idx12 = (iy-1)*nx + (ix);
+            sum+=input_image[idx12]*Kernel[1+which_layer];
+            if(ix!=nx-1)
+            {
+                unsigned int idx13 = (iy-1)*nx + (ix+1);
+                sum+=input_image[idx13]*Kernel[2+which_layer];
             }
         }
+
+        if(ix!=0)
+        {
+            unsigned int idx21 = (iy)*nx + (ix-1);
+            sum+=input_image[idx21]*Kernel[3+which_layer];
+        }
+
+        unsigned int idx22 = (iy)*nx + (ix);
+        sum+=input_image[idx22]*Kernel[4+which_layer];
+
+        if(ix!=nx-1)
+        {
+            unsigned int idx23 = (iy)*nx + (ix+1);
+            sum+=input_image[idx23]*Kernel[5+which_layer];
+        }
+        if(iy!=ny-1)
+        {
+            if(ix!=0)
+            {
+                unsigned int idx31 = (iy+1)*nx + (ix-1);
+                sum+=input_image[idx31]*Kernel[6+which_layer];
+            }
+
+            if(iy!=ny-1)
+            {
+                unsigned int idx32 = (iy+1)*nx + (ix);
+                sum+=input_image[idx32]*Kernel[7+which_layer];
+            }
+            if(ix!=nx-1 && iy!=ny-1)
+            {
+                unsigned int idx33 = (iy+1)*nx + (ix+1);
+                sum+=input_image[idx33]*Kernel[8+which_layer];
+            }
+        }
+
+        //        if(!(iy+r==-1 | ix+c==-1 | ix+c==nx | iy+r==ny ))
+        //        {
+        //            sum+=input_image[idx]*Kernel[3*(r+1)+(c+1)+which_layer];
+        //            //#if DEBUG_MODE==1
+        //            //                    printf("row:%d col:%d Pixel:%f Kernel:%f SUM:%f\n",iy+r,
+        //            //                           ix+c,input_image[idx],Kernel[3*(r+1)+(c+1)+layer*9],sum);
+        //            //#endif
+        //        }
         output_image[idx_base+nx*ny*layer]=relu(sum+bias[layer]);
     }
 }
@@ -261,6 +312,25 @@ __global__ void CONV2D_2_GPU1(float *input_image, float *output_image, float *Ke
             }
         }
         output_image[idx_base+nx*ny*layer]=relu(sum+bias[layer]);
+    }
+}
+
+__global__ void CONV2D_2_GPU1X1(float *input_image, float *output_image, float *Kernel,float *bias,
+                                int nx, int ny,int layer,int depth)
+{
+    unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
+    unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
+    unsigned int idx_base = iy*nx + ix;
+    if (ix < nx && iy < ny)
+    {
+        float sum=0;
+        for (int dth = 0; dth < depth; ++dth)    //dth---> depth
+        {
+            int depth_index=dth*nx*ny;
+            unsigned int idx = iy*nx+ix+depth_index;
+            sum+=input_image[idx]*Kernel[dth];
+        }
+        output_image[idx_base]=sigmoid(sum+bias[layer]);
     }
 }
 
@@ -327,12 +397,12 @@ __global__ void UPSM_2D_GPU(float *input_image, float *output_image,int nx, int 
 }
 
 __global__ void CONCAT_GPU(float *input_image1,  //first volume
-                            float *input_image2,  //second volume
-                            float *output_image,  //concat first volume and second volume
-                            int nx,
-                            int ny,
-                            int layer,            //which layer is under process
-                            int NLayer )          //number of total layers
+                           float *input_image2,  //second volume
+                           float *output_image,  //concat first volume and second volume
+                           int nx,
+                           int ny,
+                           int layer,            //which layer is under process
+                           int NLayer )          //number of total layers
 {
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
@@ -342,7 +412,7 @@ __global__ void CONCAT_GPU(float *input_image1,  //first volume
     {
         output_image[idx_base1]=input_image1[idx_base1];
         output_image[idx_base2]=input_image2[idx_base1];
-//        printf("ix:%d, iy:%d, index:%d, pixel1:%f,pixel2:%f\n",ix,iy,idx_base1,input_image1[idx_base1],input_image2[idx_base1]);
+        //        printf("ix:%d, iy:%d, index:%d, pixel1:%f,pixel2:%f\n",ix,iy,idx_base1,input_image1[idx_base1],input_image2[idx_base1]);
     }
 }
 
@@ -360,7 +430,9 @@ extern "C" void conv2d_1(float* img_ptr,int w,int h,layer l)
     {
         CONV2DGPU1<<<grid,block>>>(d_input,d_output,d_kernel,d_bias,w,h,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_1:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 
 }
 
@@ -375,7 +447,9 @@ extern "C" void conv2d_2(int w, int h, layer l)
     {
         CONV2D_2_GPU1<<<grid,block>>>(d_output,d_output_2,d_kernel_2,d_bias_2,w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void maxp2d_1(int w, int h, layer l)
@@ -389,7 +463,9 @@ extern "C" void maxp2d_1(int w, int h, layer l)
     {
         MAXP2D_GPU<<<grid,block>>>(d_output_2,d_output_maxp_1,w,h,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mmaxp2d_1:%f msec \n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void conv2d_3(int w, int h, layer l)
 {
@@ -403,7 +479,9 @@ extern "C" void conv2d_3(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_1,d_output_3,d_kernel_3,d_bias_3,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_3:%f msec \n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_4(int w, int h, layer l)
@@ -418,7 +496,9 @@ extern "C" void conv2d_4(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_3,d_output_4,d_kernel_4,d_bias_4,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_4:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void maxp2d_2(int w, int h, layer l)
@@ -432,7 +512,9 @@ extern "C" void maxp2d_2(int w, int h, layer l)
     {
         MAXP2D_GPU<<<grid,block>>>(d_output_4,d_output_maxp_2,w,h,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mmaxp2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void conv2d_5(int w, int h, layer l)
 {
@@ -446,7 +528,9 @@ extern "C" void conv2d_5(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_2,d_output_5,d_kernel_5,d_bias_5,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_5:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_6(int w, int h, layer l)
@@ -461,7 +545,9 @@ extern "C" void conv2d_6(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_5,d_output_6,d_kernel_6,d_bias_6,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_6:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void maxp2d_3(int w, int h, layer l)
@@ -475,7 +561,9 @@ extern "C" void maxp2d_3(int w, int h, layer l)
     {
         MAXP2D_GPU<<<grid,block>>>(d_output_6,d_output_maxp_3,w,h,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mmaxp2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 
 }
 
@@ -491,7 +579,9 @@ extern "C" void conv2d_7(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_3,d_output_7,d_kernel_7,d_bias_7,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_7:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_8(int w, int h, layer l)
@@ -506,7 +596,9 @@ extern "C" void conv2d_8(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_7,d_output_8,d_kernel_8,d_bias_8,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_7:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void maxp2d_4(int w, int h, layer l)
@@ -520,7 +612,9 @@ extern "C" void maxp2d_4(int w, int h, layer l)
     {
         MAXP2D_GPU<<<grid,block>>>(d_output_8,d_output_maxp_4,w,h,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mmaxp2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_9(int w, int h, layer l)
@@ -535,7 +629,9 @@ extern "C" void conv2d_9(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_4,d_output_9,d_kernel_9,d_bias_9,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_9:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_10(int w, int h, layer l)
@@ -550,7 +646,9 @@ extern "C" void conv2d_10(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_9,d_output_10,d_kernel_10,d_bias_10,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_10:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void upsample_2d_1(int w, int h, layer l)
@@ -564,7 +662,9 @@ extern "C" void upsample_2d_1(int w, int h, layer l)
     {
         UPSM_2D_GPU<<<grid,block>>>(d_output_10,d_output_upsm_1,w/2,h/2,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_11(int w, int h, layer l)
@@ -579,7 +679,9 @@ extern "C" void conv2d_11(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_upsm_1,d_output_11,d_kernel_11,d_bias_11,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_11:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void concat_1(int w, int h, layer l)
@@ -593,7 +695,9 @@ extern "C" void concat_1(int w, int h, layer l)
     {
         CONCAT_GPU<<<grid,block>>>(d_output_8,d_output_11,d_output_concat_1,w,h,i,l.nfilters);
     }
+#if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_12(int w, int h, layer l)
@@ -609,7 +713,9 @@ extern "C" void conv2d_12(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_concat_1,d_output_12,d_kernel_12,d_bias_12,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_11:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_13(int w, int h, layer l)
@@ -624,7 +730,9 @@ extern "C" void conv2d_13(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_12,d_output_13,d_kernel_13,d_bias_13,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_11:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void upsample_2d_2(int w, int h, layer l)
@@ -638,7 +746,9 @@ extern "C" void upsample_2d_2(int w, int h, layer l)
     {
         UPSM_2D_GPU<<<grid,block>>>(d_output_13,d_output_upsm_2,w/2,h/2,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mupsample_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_14(int w, int h, layer l)
@@ -653,7 +763,9 @@ extern "C" void conv2d_14(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_upsm_2,d_output_14,d_kernel_14,d_bias_14,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void concat_2(int w, int h, layer l)
@@ -667,7 +779,9 @@ extern "C" void concat_2(int w, int h, layer l)
     {
         CONCAT_GPU<<<grid,block>>>(d_output_6,d_output_14,d_output_concat_2,w,h,i,l.nfilters);
     }
+#if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_15(int w, int h, layer l)
@@ -682,7 +796,9 @@ extern "C" void conv2d_15(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_concat_2,d_output_15,d_kernel_15,d_bias_15,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void conv2d_16(int w, int h, layer l)
@@ -697,7 +813,9 @@ extern "C" void conv2d_16(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_15,d_output_16,d_kernel_16,d_bias_16,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void upsample_2d_3(int w, int h, layer l)
 {
@@ -710,7 +828,9 @@ extern "C" void upsample_2d_3(int w, int h, layer l)
     {
         UPSM_2D_GPU<<<grid,block>>>(d_output_16,d_output_upsm_3,w/2,h/2,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mupsample_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void conv2d_17(int w, int h, layer l)
 {
@@ -724,7 +844,9 @@ extern "C" void conv2d_17(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_upsm_3,d_output_17,d_kernel_17,d_bias_17,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void concat_3(int w, int h, layer l)
@@ -738,7 +860,9 @@ extern "C" void concat_3(int w, int h, layer l)
     {
         CONCAT_GPU<<<grid,block>>>(d_output_4,d_output_17,d_output_concat_3,w,h,i,l.nfilters);
     }
+#if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void conv2d_18(int w, int h, layer l)
 {
@@ -752,7 +876,9 @@ extern "C" void conv2d_18(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_concat_3,d_output_18,d_kernel_18,d_bias_18,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void conv2d_19(int w, int h, layer l)
 {
@@ -766,7 +892,9 @@ extern "C" void conv2d_19(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_18,d_output_19,d_kernel_19,d_bias_19,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void upsample_2d_4(int w, int h, layer l)
 {
@@ -779,7 +907,9 @@ extern "C" void upsample_2d_4(int w, int h, layer l)
     {
         UPSM_2D_GPU<<<grid,block>>>(d_output_19,d_output_upsm_4,w/2,h/2,i);
     }
+#if print==1
     printf("time elapsed \033[1;33mupsample_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void conv2d_20(int w, int h, layer l)
 {
@@ -793,7 +923,9 @@ extern "C" void conv2d_20(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_upsm_4,d_output_20,d_kernel_20,d_bias_20,
                                        w,h,i,l.depth);
     }
+#if print==1
     printf("time elapsed \033[1;33mconv2d_20:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 
 extern "C" void concat_4(int w, int h, layer l)
@@ -807,7 +939,9 @@ extern "C" void concat_4(int w, int h, layer l)
     {
         CONCAT_GPU<<<grid,block>>>(d_output_2,d_output_20,d_output_concat_4,w,h,i,l.nfilters);
     }
+#if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void conv2d_21(int w, int h, layer l)
 {
@@ -821,7 +955,9 @@ extern "C" void conv2d_21(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_concat_4,d_output_21,d_kernel_21,d_bias_21,
                                        w,h,i,l.depth);
     }
-    printf("time elapsed \033[1;33mconv2d_20:%f msec\n\033[0m",1000*(GetTime()-t1));
+#if print==1
+    printf("time elapsed \033[1;33mconv2d_23:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
 extern "C" void conv2d_22(int w, int h, layer l)
 {
@@ -830,29 +966,52 @@ extern "C" void conv2d_22(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     double t1=GetTime();
+#pragma omp parallel for num_threads(4)
     for (int i = 0; i < l.nfilters; ++i)   //which volume is selected for conv
     {
         CONV2D_2_GPU1<<<grid,block>>>(d_output_21,d_output_22,d_kernel_22,d_bias_22,
                                        w,h,i,l.depth);
     }
-    printf("time elapsed \033[1;33mconv2d_20:%f msec\n\033[0m",1000*(GetTime()-t1));
+#if print==1
+    printf("time elapsed \033[1;34mconv2d_22:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 }
-extern "C" void conv2d_23(float** output, int w, int h, layer l)
+extern "C" void conv2d_23(int w, int h, layer l)
 {
     int dimx = 32;
     int dimy = 32;
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     double t1=GetTime();
+
     for (int i = 0; i < l.nfilters; ++i)   //which volume is selected for conv
     {
         CONV2D_2_GPU1<<<grid,block>>>(d_output_22,d_output_23,d_kernel_23,d_bias_23,
                                        w,h,i,l.depth);
     }
-    printf("time elapsed \033[1;33mconv2d_20:%f msec\n\033[0m",1000*(GetTime()-t1));
-    float* h_output =(float*)malloc(l.output_size);
-    cudaMemcpy(h_output, d_output_23,l.output_size, cudaMemcpyDeviceToHost);
+#if print==1
+    printf("time elapsed \033[1;34mconv2d_23:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
+}
 
+extern "C" void conv2d_24(float** output, int w, int h, layer l)
+{
+    int dimx = 32;
+    int dimy = 32;
+    dim3 block(dimx, dimy);
+    dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
+    double t1=GetTime();
+
+    CONV2D_2_GPU1X1<<<grid,block>>>(d_output_23,d_output_24,d_kernel_24,d_bias_24,
+                                     w,h,0,l.depth);
+#if print==1
+    printf("time elapsed \033[1;34mconv2d_20:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
+    t1=GetTime();
+    cudaMemcpy(h_output, d_output_24,l.output_size, cudaMemcpyDeviceToHost);
+#if print==1
+    printf("time elapsed \033[1;35mCopyTime:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
     *output=h_output;
 }
 extern "C" void LOAD_NEURAL_NETWORK(LAYER Layer, int w, int h, layer& l)
@@ -1490,6 +1649,12 @@ extern "C" void LOAD_NEURAL_NETWORK(LAYER Layer, int w, int h, layer& l)
         l.bias_size = l.nfilters * sizeof(float);
         cudaMalloc((void**)&d_bias_24, l.bias_size);
 
+        cudaMemset(d_output_24, 0, l.output_size);
+        CHECK(cudaMemcpy(d_kernel_24,l.weight,l.kernel_size, cudaMemcpyHostToDevice));
+        CHECK(cudaMemcpy(d_bias_24,l.bias,l.bias_size,cudaMemcpyHostToDevice));
+
+        cudaMallocHost(&h_output,l.output_size);
+
         l.im_h=h;
         l.im_w=w;
         printf("\033[1;31mLOAD CONV2D_20: image:%d,%d \n\033[0m",w,h);
@@ -1625,5 +1790,7 @@ extern "C" void Remove_NN()
     cudaFree(d_output_24);
     cudaFree(d_kernel_24);
     cudaFree(d_bias_24);
+
+    cudaFreeHost(h_output);
     printf("\033[1;31mRemove weights from Memory\n\033[0m");
 }
