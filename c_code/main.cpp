@@ -650,17 +650,20 @@ int main(int argc, char const *argv[])
 {
     exe_path="/home/nict/plate_finder_section/programs/cuda_c_code/5/weights/";
     cout<<exe_path.toStdString()<<endl;
-    Mat img(256,256,CV_32FC1);
-    QFile file1(exe_path+"c1.txt"); file1.open(QIODevice::ReadWrite); QTextStream in1(&file1);
-    int r=0;
-    while (!in1.atEnd()) {
-        QString l1=in1.readLine();
-        QStringList ll1=l1.split(",");
-        for (int c = 0; c < ll1.size(); ++c) {
-            img.at<float>(r,c)=ll1[c].toFloat();
-        }
-        r++;
-    }
+    Mat img=imread("/home/nict/isv/picture/2/2/44.JPG",IMREAD_GRAYSCALE);//256,256,CV_32FC1);
+    cv::resize(img,img,Size(256,256));
+    img.convertTo(img,CV_32FC1);
+    cv::normalize(img,img,1,0,NORM_MINMAX);
+//    QFile file1(exe_path+"c1.txt"); file1.open(QIODevice::ReadWrite); QTextStream in1(&file1);
+//    int r=0;
+//    while (!in1.atEnd()) {
+//        QString l1=in1.readLine();
+//        QStringList ll1=l1.split(",");
+//        for (int c = 0; c < ll1.size(); ++c) {
+//            img.at<float>(r,c)=ll1[c].toFloat();
+//        }
+//        r++;
+//    }
 
 
     layer l_conv2d_1=initialize_conv2d_1_layer();
@@ -738,11 +741,13 @@ int main(int argc, char const *argv[])
     layer_type=CONV2D_22;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_22);
     layer_type=CONV2D_23;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_23);
     layer_type=CONV2D_24;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_24);
-
+    imshow("final_img",img);
+    waitKey(0);
     float* output_conv2d_24 = nullptr;
-        double t1=getTickCount();
+
 
         conv2d_1(img.ptr<float>(0),img.cols,img.rows,l_conv2d_1);
+                double t1=getTickCount();
         conv2d_2(img.cols,img.rows,l_conv2d_2);
         maxp2d_1(img.cols/2,img.rows/2,l_maxp2d_1);
         conv2d_3(img.cols/2,img.rows/2,l_conv2d_3);

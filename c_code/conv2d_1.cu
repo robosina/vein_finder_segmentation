@@ -7,7 +7,7 @@
 #include "layer.h"
 #define DEBUG_MODE 0
 #define CPU_DEBUG_MODE 0
-#define print 0
+#define print 1
 using namespace std;
 
     enum LAYER
@@ -287,7 +287,7 @@ __global__ void CONV2DGPU1(float *input_image, float *output_image, float *Kerne
         output_image[idx_base+nx*ny*layer]=relu(sum+bias[layer]);
     }
 }
-__global__ void CONV2D_2_GPU1(float *input_image, float *output_image, float *Kernel,float *bias,
+__global__ void  CONV2D_2_GPU1(float *input_image, float *output_image, float *Kernel,float *bias,
                               int nx, int ny,int layer,int depth)
 {
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
@@ -296,6 +296,7 @@ __global__ void CONV2D_2_GPU1(float *input_image, float *output_image, float *Ke
     if (ix < nx && iy < ny)
     {
         float sum=0;
+        #pragma unroll 4
         for (int dth = 0; dth < depth; ++dth)    //dth---> depth
         {
             int depth_index=dth*nx*ny;
@@ -430,6 +431,7 @@ extern "C" void conv2d_1(float* img_ptr,int w,int h,layer l)
     {
         CONV2DGPU1<<<grid,block>>>(d_input,d_output,d_kernel,d_bias,w,h,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_1:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -447,6 +449,7 @@ extern "C" void conv2d_2(int w, int h, layer l)
     {
         CONV2D_2_GPU1<<<grid,block>>>(d_output,d_output_2,d_kernel_2,d_bias_2,w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -463,6 +466,7 @@ extern "C" void maxp2d_1(int w, int h, layer l)
     {
         MAXP2D_GPU<<<grid,block>>>(d_output_2,d_output_maxp_1,w,h,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mmaxp2d_1:%f msec \n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -479,6 +483,7 @@ extern "C" void conv2d_3(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_1,d_output_3,d_kernel_3,d_bias_3,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_3:%f msec \n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -496,6 +501,7 @@ extern "C" void conv2d_4(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_3,d_output_4,d_kernel_4,d_bias_4,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_4:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -512,6 +518,7 @@ extern "C" void maxp2d_2(int w, int h, layer l)
     {
         MAXP2D_GPU<<<grid,block>>>(d_output_4,d_output_maxp_2,w,h,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mmaxp2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -528,6 +535,7 @@ extern "C" void conv2d_5(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_2,d_output_5,d_kernel_5,d_bias_5,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_5:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -545,6 +553,7 @@ extern "C" void conv2d_6(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_5,d_output_6,d_kernel_6,d_bias_6,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_6:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -561,6 +570,7 @@ extern "C" void maxp2d_3(int w, int h, layer l)
     {
         MAXP2D_GPU<<<grid,block>>>(d_output_6,d_output_maxp_3,w,h,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mmaxp2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -579,6 +589,7 @@ extern "C" void conv2d_7(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_3,d_output_7,d_kernel_7,d_bias_7,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_7:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -596,6 +607,7 @@ extern "C" void conv2d_8(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_7,d_output_8,d_kernel_8,d_bias_8,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_7:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -612,6 +624,7 @@ extern "C" void maxp2d_4(int w, int h, layer l)
     {
         MAXP2D_GPU<<<grid,block>>>(d_output_8,d_output_maxp_4,w,h,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mmaxp2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -629,6 +642,7 @@ extern "C" void conv2d_9(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_maxp_4,d_output_9,d_kernel_9,d_bias_9,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_9:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -646,6 +660,7 @@ extern "C" void conv2d_10(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_9,d_output_10,d_kernel_10,d_bias_10,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_10:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -662,6 +677,7 @@ extern "C" void upsample_2d_1(int w, int h, layer l)
     {
         UPSM_2D_GPU<<<grid,block>>>(d_output_10,d_output_upsm_1,w/2,h/2,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -679,6 +695,7 @@ extern "C" void conv2d_11(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_upsm_1,d_output_11,d_kernel_11,d_bias_11,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_11:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -695,6 +712,7 @@ extern "C" void concat_1(int w, int h, layer l)
     {
         CONCAT_GPU<<<grid,block>>>(d_output_8,d_output_11,d_output_concat_1,w,h,i,l.nfilters);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -713,6 +731,7 @@ extern "C" void conv2d_12(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_concat_1,d_output_12,d_kernel_12,d_bias_12,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_11:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -730,6 +749,7 @@ extern "C" void conv2d_13(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_12,d_output_13,d_kernel_13,d_bias_13,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_11:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -746,6 +766,7 @@ extern "C" void upsample_2d_2(int w, int h, layer l)
     {
         UPSM_2D_GPU<<<grid,block>>>(d_output_13,d_output_upsm_2,w/2,h/2,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mupsample_2:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -763,6 +784,7 @@ extern "C" void conv2d_14(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_upsm_2,d_output_14,d_kernel_14,d_bias_14,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -779,6 +801,7 @@ extern "C" void concat_2(int w, int h, layer l)
     {
         CONCAT_GPU<<<grid,block>>>(d_output_6,d_output_14,d_output_concat_2,w,h,i,l.nfilters);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -796,6 +819,7 @@ extern "C" void conv2d_15(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_concat_2,d_output_15,d_kernel_15,d_bias_15,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -813,6 +837,7 @@ extern "C" void conv2d_16(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_15,d_output_16,d_kernel_16,d_bias_16,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -828,6 +853,7 @@ extern "C" void upsample_2d_3(int w, int h, layer l)
     {
         UPSM_2D_GPU<<<grid,block>>>(d_output_16,d_output_upsm_3,w/2,h/2,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mupsample_2:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -844,6 +870,7 @@ extern "C" void conv2d_17(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_upsm_3,d_output_17,d_kernel_17,d_bias_17,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -860,6 +887,7 @@ extern "C" void concat_3(int w, int h, layer l)
     {
         CONCAT_GPU<<<grid,block>>>(d_output_4,d_output_17,d_output_concat_3,w,h,i,l.nfilters);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -876,6 +904,7 @@ extern "C" void conv2d_18(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_concat_3,d_output_18,d_kernel_18,d_bias_18,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -892,6 +921,7 @@ extern "C" void conv2d_19(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_18,d_output_19,d_kernel_19,d_bias_19,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_14:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -907,6 +937,7 @@ extern "C" void upsample_2d_4(int w, int h, layer l)
     {
         UPSM_2D_GPU<<<grid,block>>>(d_output_19,d_output_upsm_4,w/2,h/2,i);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mupsample_2:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -923,6 +954,7 @@ extern "C" void conv2d_20(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_upsm_4,d_output_20,d_kernel_20,d_bias_20,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_20:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -939,6 +971,7 @@ extern "C" void concat_4(int w, int h, layer l)
     {
         CONCAT_GPU<<<grid,block>>>(d_output_2,d_output_20,d_output_concat_4,w,h,i,l.nfilters);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mupsample_1:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -955,6 +988,7 @@ extern "C" void conv2d_21(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_concat_4,d_output_21,d_kernel_21,d_bias_21,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;33mconv2d_23:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -972,6 +1006,7 @@ extern "C" void conv2d_22(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_21,d_output_22,d_kernel_22,d_bias_22,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;34mconv2d_22:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -989,6 +1024,7 @@ extern "C" void conv2d_23(int w, int h, layer l)
         CONV2D_2_GPU1<<<grid,block>>>(d_output_22,d_output_23,d_kernel_23,d_bias_23,
                                        w,h,i,l.depth);
     }
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;34mconv2d_23:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
@@ -1004,10 +1040,10 @@ extern "C" void conv2d_24(float** output, int w, int h, layer l)
 
     CONV2D_2_GPU1X1<<<grid,block>>>(d_output_23,d_output_24,d_kernel_24,d_bias_24,
                                      w,h,0,l.depth);
+    cudaDeviceSynchronize();
 #if print==1
     printf("time elapsed \033[1;34mconv2d_20:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
-    t1=GetTime();
     cudaMemcpy(h_output, d_output_24,l.output_size, cudaMemcpyDeviceToHost);
 #if print==1
     printf("time elapsed \033[1;35mCopyTime:%f msec\n\033[0m",1000*(GetTime()-t1));
@@ -1641,7 +1677,7 @@ extern "C" void LOAD_NEURAL_NETWORK(LAYER Layer, int w, int h, layer& l)
     case CONV2D_24:
     {
         l.output_size = w * h *l.nfilters * sizeof(float);
-        cudaMalloc(&d_output_24, l.output_size);
+        cudaMallocHost(&d_output_24, l.output_size);
 
         l.kernel_size = l.width * l.height * l.nfilters * l.depth * sizeof(float);
         cudaMalloc( (void**)&d_kernel_24, l.kernel_size);
