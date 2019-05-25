@@ -1,7 +1,7 @@
 # performance on using CUDNN 
 
 | Operation | without using cudnn (miliSecond) | with using cudnn (milimSecond) |
-| :---         |     :---:      |          ---: |
+| :---         |     :---:      |          :---: |
 | conv2d_2  | 0.063181          |0.028133     |
 | conv2d_3     | 1.367092       |    0.021935       |
 | conv2d_4     | 2.789974       |    0.027895       |
