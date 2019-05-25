@@ -1,13 +1,34 @@
 **using cudnn performance**
 
-| Left-aligned | Center-aligned | Right-aligned |
+| Operation | without using cudnn (miliSecond) | with using cudnn (milimSecond) |
 | :---         |     :---:      |          ---: |
-| git status   | git status     | git status    |
-| git diff     | git diff       | git diff      |
+| conv2d_2  | 0.063181          |0.028133     |
+| conv2d_3     | 1.367092       |    0.021935       |
+| conv2d_4     | 2.789974       |    0.027895       |
+| conv2d_5     | 1.690865       | 0.030994       |
+| conv2d_6     | 3.129005       | 0.041962      |
+| conv2d_7     | 3.093958       | 0.015020       |
+| conv2d_8     | 3.164053       | 0.012159      |
+| conv2d_9     | 4.925966        | 0.015974       |
+| conv2d_10     | 9.057999        | 0.015020       |
+| conv2d_11     | 6.165028       | 0.014067      |
+| conv2d_12     | 6.513119        | 0.014067      |
+| conv2d_13     |3.114939      | 0.041008      |
+| conv2d_14     | 3.297091      | 0.014067      |
+| conv2d_15     | 6.387949       | 0.013828      |
+| conv2d_16     | 3.302097      | 0.015020      |
+| conv2d_17     | 4.734039       | 0.014782      |
+| conv2d_18     | 5.023003        | 0.014067      |
+| conv2d_19    |2.573013       | 0.017166     |
+| conv2d_20     | 4.115105      | 0.018120      |
+| conv2d_21     | 4.421949       | 0.017166      |
+| conv2d_22     | 3.973961      | 0.015974      |
+| conv2d_23     | 0.527859       | 0.016212      |
 
 
-
-
+| Performance | without using cudnn (miliSecond) | with using cudnn (milimSecond) |
+| :---         |     :---:      |          ---: |
+|     | 0.089542  (11fps)      | 0.00562326  (177.83fps)      |
 
 # vein_finder_segmentation
 
