@@ -27,7 +27,7 @@
 
 
 # overall performance
-| Performance | without using cudnn (miliSecond) | with using cudnn (milimSecond) |
+| Performance | without using cudnn (miliSecond) | with using cudnn (miliSecond) |
 | :---         |     :---:      |          ---: |
 |     | 0.089542 sec (11 fps)      | 0.002996 sec  (333.71 fps)      |
 
