@@ -1250,7 +1250,9 @@ extern "C" void conv2d_13(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_13,d_bias_13,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_13:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;
@@ -1411,7 +1413,9 @@ extern "C" void conv2d_16(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_16,d_bias_16,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_16:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;
@@ -1467,7 +1471,9 @@ extern "C" void conv2d_17(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_17,d_bias_17,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_17:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;
@@ -1524,7 +1530,9 @@ extern "C" void conv2d_18(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_18,d_bias_18,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_18:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;
@@ -1564,7 +1572,9 @@ extern "C" void conv2d_19(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_19,d_bias_19,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_19:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;
@@ -1620,7 +1630,9 @@ extern "C" void conv2d_20(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_20,d_bias_20,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_20:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;
@@ -1677,7 +1689,9 @@ extern "C" void conv2d_21(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_21,d_bias_21,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_21:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;
@@ -1717,7 +1731,9 @@ extern "C" void conv2d_22(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_22,d_bias_22,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_22:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;
@@ -1757,7 +1773,9 @@ extern "C" void conv2d_23(int w, int h, layer l)
     dim3 block(dimx, dimy);
     dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
     add_bias<<<grid,block>>>(d_output_23,d_bias_23,w,h,l.nfilters);
+#if print==1
     printf("time elapsed \033[1;35mconv2d_23:%f msec\n\033[0m",1000*(GetTime()-t1));
+#endif
 #else
     int dimx = 32;
     int dimy = 32;

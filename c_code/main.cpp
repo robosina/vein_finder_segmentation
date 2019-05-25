@@ -752,7 +752,7 @@ int main(int argc, char const *argv[])
     float* output_conv2d_24 = nullptr;
 
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 500; ++i) {
         conv2d_1(img.ptr<float>(0),img.cols,img.rows,l_conv2d_1);
         double t1=getTickCount();
         conv2d_2(img.cols,img.rows,l_conv2d_2);
@@ -789,8 +789,9 @@ int main(int argc, char const *argv[])
         conv2d_21(img.cols,img.cols,l_conv2d_21);
         conv2d_22(img.cols,img.cols,l_conv2d_22);
         conv2d_23(img.cols,img.cols,l_conv2d_23);
-        cout<<"final image without transferring data="<<(getTickCount()-t1)/getTickFrequency()<<endl;
         conv2d_24(&output_conv2d_24,img.cols,img.cols,l_conv2d_24);
+        cout<<"final image without transferring data="<<(getTickCount()-t1)/getTickFrequency()<<endl;
+
     }
 
 //    cout<<"final image time="<<(getTickCount()-t1)/getTickFrequency()<<endl;
