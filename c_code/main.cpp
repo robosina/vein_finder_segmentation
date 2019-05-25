@@ -8,7 +8,7 @@ using namespace cv;
 #include <vector>
 #include <thread>
 #include <QImage>
-
+#define read_from_c1 1
 QString exe_path;
 using namespace std;
 enum LAYER
@@ -100,7 +100,7 @@ vector<float> weights_conv2d_24;   //38th layer
 vector<float> bias_conv2d_24;      //38th layer
 
 extern "C" void conv2d_1(float* img_ptr,int w,int h,layer l);
-extern "C" void conv2d_2(int w,int h,layer l);
+extern "C" void conv2d_2(float** output,int w, int h, layer l);
 extern "C" void maxp2d_1(int w,int h,layer l);
 extern "C" void conv2d_3(int w,int h,layer l);
 extern "C" void conv2d_4(int w,int h,layer l);
@@ -648,22 +648,29 @@ layer initialize_conv2d_24_layer()
 }
 int main(int argc, char const *argv[])
 {
+
     exe_path="/home/nict/plate_finder_section/programs/cuda_c_code/5/weights/";
     cout<<exe_path.toStdString()<<endl;
+#if read_from_c1==1
+    Mat img(256,256,CV_32F);
+    QFile file1(exe_path+"c1.txt"); file1.open(QIODevice::ReadWrite); QTextStream in1(&file1);
+    int r=0;
+    while (!in1.atEnd()) {
+        QString l1=in1.readLine();
+        QStringList ll1=l1.split(",");
+        for (int c = 0; c < ll1.size(); ++c) {
+            img.at<float>(r,c)=ll1[c].toFloat();
+        }
+        r++;
+    }
+#else
     Mat img=imread("/home/nict/isv/picture/2/2/44.JPG",IMREAD_GRAYSCALE);//256,256,CV_32FC1);
     cv::resize(img,img,Size(256,256));
     img.convertTo(img,CV_32FC1);
     cv::normalize(img,img,1,0,NORM_MINMAX);
-//    QFile file1(exe_path+"c1.txt"); file1.open(QIODevice::ReadWrite); QTextStream in1(&file1);
-//    int r=0;
-//    while (!in1.atEnd()) {
-//        QString l1=in1.readLine();
-//        QStringList ll1=l1.split(",");
-//        for (int c = 0; c < ll1.size(); ++c) {
-//            img.at<float>(r,c)=ll1[c].toFloat();
-//        }
-//        r++;
-//    }
+#endif
+
+
 
 
     layer l_conv2d_1=initialize_conv2d_1_layer();
@@ -744,47 +751,48 @@ int main(int argc, char const *argv[])
     imshow("final_img",img);
     waitKey(0);
     float* output_conv2d_24 = nullptr;
+    float* d_output_conv2=nullptr;
 
+    conv2d_1(img.ptr<float>(0),img.cols,img.rows,l_conv2d_1);
+    double t1=getTickCount();
+    conv2d_2(&d_output_conv2,img.cols,img.rows,l_conv2d_2);
+    maxp2d_1(img.cols/2,img.rows/2,l_maxp2d_1);
+    conv2d_3(img.cols/2,img.rows/2,l_conv2d_3);
+    conv2d_4(img.cols/2,img.rows/2,l_conv2d_4);
+    maxp2d_2(img.cols/4,img.rows/4,l_maxp2d_2);
+    conv2d_5(img.cols/4,img.rows/4,l_conv2d_5);
+    conv2d_6(img.cols/4,img.rows/4,l_conv2d_6);
+    maxp2d_3(img.cols/8,img.rows/8,l_maxp2d_3);
+    conv2d_7(img.cols/8,img.rows/8,l_conv2d_7);
+    conv2d_8(img.cols/8,img.rows/8,l_conv2d_8);
+    maxp2d_4(img.cols/16,img.rows/16,l_maxp2d_4);
+    conv2d_9(img.cols/16,img.rows/16,l_conv2d_9);
+    conv2d_10(img.cols/16,img.rows/16,l_conv2d_10);
+    upsample_2d_1(img.cols/8,img.cols/8,l_upsm2d_1);
+    conv2d_11(img.cols/8,img.rows/8,l_conv2d_11);
+    concat_1(img.cols/8,img.cols/8,l_concat_1);
+    conv2d_12(img.cols/8,img.cols/8,l_conv2d_12);
+    conv2d_13(img.cols/8,img.cols/8,l_conv2d_13);
+    upsample_2d_2(img.cols/4,img.cols/4,l_upsm2d_2);
+    conv2d_14(img.cols/4,img.cols/4,l_conv2d_14);
+    concat_2(img.cols/4,img.cols/4,l_concat_2);
+    conv2d_15(img.cols/4,img.cols/4,l_conv2d_15);
+    conv2d_16(img.cols/4,img.cols/4,l_conv2d_16);
+    upsample_2d_3(img.cols/2,img.cols/2,l_upsm2d_3);
+    conv2d_17(img.cols/2,img.cols/2,l_conv2d_17);
+    concat_3(img.cols/2,img.cols/2,l_concat_3);
+    conv2d_18(img.cols/2,img.cols/2,l_conv2d_18);
+    conv2d_19(img.cols/2,img.cols/2,l_conv2d_19);
+    upsample_2d_4(img.cols,img.cols,l_upsm2d_4);
+    conv2d_20(img.cols,img.cols,l_conv2d_20);
+    concat_4(img.cols,img.cols,l_concat_4);
+    conv2d_21(img.cols,img.cols,l_conv2d_21);
+    conv2d_22(img.cols,img.cols,l_conv2d_22);
+    conv2d_23(img.cols,img.cols,l_conv2d_23);
+    cout<<"final image without transferring data="<<(getTickCount()-t1)/getTickFrequency()<<endl;
+    conv2d_24(&output_conv2d_24,img.cols,img.cols,l_conv2d_24);
 
-        conv2d_1(img.ptr<float>(0),img.cols,img.rows,l_conv2d_1);
-                double t1=getTickCount();
-        conv2d_2(img.cols,img.rows,l_conv2d_2);
-        maxp2d_1(img.cols/2,img.rows/2,l_maxp2d_1);
-        conv2d_3(img.cols/2,img.rows/2,l_conv2d_3);
-        conv2d_4(img.cols/2,img.rows/2,l_conv2d_4);
-        maxp2d_2(img.cols/4,img.rows/4,l_maxp2d_2);
-        conv2d_5(img.cols/4,img.rows/4,l_conv2d_5);
-        conv2d_6(img.cols/4,img.rows/4,l_conv2d_6);
-        maxp2d_3(img.cols/8,img.rows/8,l_maxp2d_3);
-        conv2d_7(img.cols/8,img.rows/8,l_conv2d_7);
-        conv2d_8(img.cols/8,img.rows/8,l_conv2d_8);
-        maxp2d_4(img.cols/16,img.rows/16,l_maxp2d_4);
-        conv2d_9(img.cols/16,img.rows/16,l_conv2d_9);
-        conv2d_10(img.cols/16,img.rows/16,l_conv2d_10);
-        upsample_2d_1(img.cols/8,img.cols/8,l_upsm2d_1);
-        conv2d_11(img.cols/8,img.rows/8,l_conv2d_11);
-        concat_1(img.cols/8,img.cols/8,l_concat_1);
-        conv2d_12(img.cols/8,img.cols/8,l_conv2d_12);
-        conv2d_13(img.cols/8,img.cols/8,l_conv2d_13);
-        upsample_2d_2(img.cols/4,img.cols/4,l_upsm2d_2);
-        conv2d_14(img.cols/4,img.cols/4,l_conv2d_14);
-        concat_2(img.cols/4,img.cols/4,l_concat_2);
-        conv2d_15(img.cols/4,img.cols/4,l_conv2d_15);
-        conv2d_16(img.cols/4,img.cols/4,l_conv2d_16);
-        upsample_2d_3(img.cols/2,img.cols/2,l_upsm2d_3);
-        conv2d_17(img.cols/2,img.cols/2,l_conv2d_17);
-        concat_3(img.cols/2,img.cols/2,l_concat_3);
-        conv2d_18(img.cols/2,img.cols/2,l_conv2d_18);
-        conv2d_19(img.cols/2,img.cols/2,l_conv2d_19);
-        upsample_2d_4(img.cols,img.cols,l_upsm2d_4);
-        conv2d_20(img.cols,img.cols,l_conv2d_20);
-        concat_4(img.cols,img.cols,l_concat_4);
-        conv2d_21(img.cols,img.cols,l_conv2d_21);
-        conv2d_22(img.cols,img.cols,l_conv2d_22);
-        conv2d_23(img.cols,img.cols,l_conv2d_23);
-        cout<<"final image without transferring data="<<(getTickCount()-t1)/getTickFrequency()<<endl;
-        conv2d_24(&output_conv2d_24,img.cols,img.cols,l_conv2d_24);
-        cout<<"final image time="<<(getTickCount()-t1)/getTickFrequency()<<endl;
+    //    cout<<"final image time="<<(getTickCount()-t1)/getTickFrequency()<<endl;
     Mat final_image(256,256,CV_32F,output_conv2d_24);
     cv::normalize(final_image,final_image,255,0,NORM_MINMAX);
     final_image.convertTo(final_image,CV_8U);
@@ -792,18 +800,22 @@ int main(int argc, char const *argv[])
     imshow("final_img",final_image);
     waitKey(0);
     //    return 0;
-    //    Size OShape(l_conv2d_23.im_w,l_conv2d_23.im_h);   //output shape
-    //    int ALen=OShape.area();  //array length
-    //    float* output2=(float*)malloc(ALen*sizeof (float));
-    //    vector<Mat> imgs;
-    //    for (int layer = 0; layer < l_conv2d_23.nfilters; ++layer)
+    Size OShape(l_conv2d_2.im_w,l_conv2d_2.im_h);   //output shape
+    int ALen=OShape.area();  //array length
+    float* output2=(float*)malloc(ALen*sizeof (float));
+    vector<Mat> imgs;
+    //    for (int layer = 0; layer < l_conv2d_2.nfilters; ++layer)
     //    {
     //        for (int i = 0; i < ALen; ++i)
     //        {
-    //            output2[i]=output_conv2d_24[i+ALen*layer];
+    //            output2[i]=d_output_conv2[i+ALen*layer];
     //        }
     //        cv::Mat output_img(OShape.width,OShape.height,CV_32F,output2);
-    //        imgs.push_back(output_img.clone());
+    //        cout<<output_img.rowRange(0,10).colRange(0,10)<<endl;
+    //        imshow("output",output_img);
+    //        waitKey(0);
+    //        break;
+    //        //        imgs.push_back(output_img.clone());
     //    }
 
     //    cout<<imgs[0].rowRange(0,5).colRange(0,5)<<endl;

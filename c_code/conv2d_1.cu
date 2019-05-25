@@ -5,10 +5,13 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include "layer.h"
+#include "cudnn.h"
 #define DEBUG_MODE 0
 #define CPU_DEBUG_MODE 0
 #define print 1
-using namespace std;
+
+#define using_cudnn 1
+    using namespace std;
 
     enum LAYER
 {
@@ -175,8 +178,21 @@ float* d_bias_23{0};
 float* d_output_24{0};
 float* d_kernel_24{0};
 float* d_bias_24{0};
-
 float* h_output;
+
+#if using_cudnn==1
+cudnnTensorDescriptor_t input_descriptor;
+cudnnTensorDescriptor_t output_descriptor;
+cudnnFilterDescriptor_t kernel_descriptor;
+cudnnConvolutionDescriptor_t convolution_descriptor;
+cudnnConvolutionFwdAlgo_t convolution_algorithm;
+size_t workspace_bytes = 0;
+void* d_workspace{nullptr};
+const float alpha = 1, beta = 0;
+cudnnHandle_t cudnn;
+
+#endif
+
 #define checkCUDNN(expression)                               \
   {                                                          \
     cudnnStatus_t status = (expression);                     \
@@ -275,15 +291,6 @@ __global__ void CONV2DGPU1(float *input_image, float *output_image, float *Kerne
                 sum+=input_image[idx33]*Kernel[8+which_layer];
             }
         }
-
-        //        if(!(iy+r==-1 | ix+c==-1 | ix+c==nx | iy+r==ny ))
-        //        {
-        //            sum+=input_image[idx]*Kernel[3*(r+1)+(c+1)+which_layer];
-        //            //#if DEBUG_MODE==1
-        //            //                    printf("row:%d col:%d Pixel:%f Kernel:%f SUM:%f\n",iy+r,
-        //            //                           ix+c,input_image[idx],Kernel[3*(r+1)+(c+1)+layer*9],sum);
-        //            //#endif
-        //        }
         output_image[idx_base+nx*ny*layer]=relu(sum+bias[layer]);
     }
 }
@@ -296,7 +303,7 @@ __global__ void  CONV2D_2_GPU1(float *input_image, float *output_image, float *K
     if (ix < nx && iy < ny)
     {
         float sum=0;
-        #pragma unroll 4
+#pragma unroll 1
         for (int dth = 0; dth < depth; ++dth)    //dth---> depth
         {
             int depth_index=dth*nx*ny;
@@ -325,6 +332,7 @@ __global__ void CONV2D_2_GPU1X1(float *input_image, float *output_image, float *
     if (ix < nx && iy < ny)
     {
         float sum=0;
+#pragma unroll 1
         for (int dth = 0; dth < depth; ++dth)    //dth---> depth
         {
             int depth_index=dth*nx*ny;
@@ -334,7 +342,21 @@ __global__ void CONV2D_2_GPU1X1(float *input_image, float *output_image, float *
         output_image[idx_base]=sigmoid(sum+bias[layer]);
     }
 }
+__global__ void add_bias(float *output_image,float *bias,int nx, int ny,int layer_size)
+{
+    unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
+    unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
 
+    if (ix < nx && iy < ny)
+    {
+        for (int layer = 0; layer < layer_size; ++layer)
+        {
+            unsigned int idx_base = iy*nx + ix + layer*nx*ny;
+            output_image[idx_base]=relu(output_image[idx_base]+bias[layer]);
+
+        }
+    }
+}
 
 __global__ void MAXP2D_GPU(float *input_image, float *output_image,int nx, int ny,int layer)
 {
@@ -438,8 +460,32 @@ extern "C" void conv2d_1(float* img_ptr,int w,int h,layer l)
 
 }
 
-extern "C" void conv2d_2(int w, int h, layer l)
+extern "C" void conv2d_2(float** output,int w, int h, layer l)
 {
+
+#if using_cudnn==1
+    double t1=GetTime();
+    checkCUDNN(cudnnConvolutionForward(cudnn,
+                                       &alpha,
+                                       input_descriptor,
+                                       d_output,
+                                       kernel_descriptor,
+                                       d_kernel_2,
+                                       convolution_descriptor,
+                                       convolution_algorithm,
+                                       d_workspace,
+                                       workspace_bytes,
+                                       &beta,
+                                       output_descriptor,
+                                       d_output_2));
+    printf("time elapsed \033[1;35mconv2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+    int dimx = 32;
+    int dimy = 32;
+    dim3 block(dimx, dimy);
+    dim3 grid((w + block.x - 1) / block.x, (h + block.y - 1) / block.y);
+    add_bias<<<grid,block>>>(d_output_2,d_bias_2,256,256,16);
+
+#else
     int dimx = 32;
     int dimy = 32;
     dim3 block(dimx, dimy);
@@ -449,10 +495,14 @@ extern "C" void conv2d_2(int w, int h, layer l)
     {
         CONV2D_2_GPU1<<<grid,block>>>(d_output,d_output_2,d_kernel_2,d_bias_2,w,h,i,l.depth);
     }
-    cudaDeviceSynchronize();
 #if print==1
-    printf("time elapsed \033[1;33mconv2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
+    printf("time elapsed \033[1;35mconv2d_2:%f msec\n\033[0m",1000*(GetTime()-t1));
 #endif
+    cudaDeviceSynchronize();
+#endif
+    float* h_output=(float*)malloc(l.output_size);
+    cudaMemcpy(h_output,d_output_2,l.output_size, cudaMemcpyDeviceToHost);
+    *output=h_output;
 }
 
 extern "C" void maxp2d_1(int w, int h, layer l)
@@ -1094,6 +1144,78 @@ extern "C" void LOAD_NEURAL_NETWORK(LAYER Layer, int w, int h, layer& l)
         l.im_h=h;
         l.im_w=w;
         printf("\033[1;31mLOAD CONV2D_2: image:%d,%d \n\033[0m",w,h);
+
+#if using_cudnn==1
+        cudnnCreate(&cudnn);
+
+
+        checkCUDNN(cudnnCreateTensorDescriptor(&input_descriptor));
+        checkCUDNN(cudnnSetTensor4dDescriptor(input_descriptor,
+                                              /*format=*/CUDNN_TENSOR_NCHW,
+                                              /*dataType=*/CUDNN_DATA_FLOAT,
+                                              /*batch_size=*/1,
+                                              /*channels=*/16,
+                                              /*image_height=*/l.im_h,
+                                              /*image_width=*/l.im_w));
+
+
+        checkCUDNN(cudnnCreateTensorDescriptor(&output_descriptor));
+        checkCUDNN(cudnnSetTensor4dDescriptor(output_descriptor,
+                                              /*format=*/CUDNN_TENSOR_NCHW,
+                                              /*dataType=*/CUDNN_DATA_FLOAT,
+                                              /*batch_size=*/1,
+                                              /*channels=*/16,
+                                              /*image_height=*/l.im_h,
+                                              /*image_width=*/l.im_w));
+
+
+        checkCUDNN(cudnnCreateFilterDescriptor(&kernel_descriptor));
+        checkCUDNN(cudnnSetFilter4dDescriptor(kernel_descriptor,
+                                              /*dataType=*/CUDNN_DATA_FLOAT,
+                                              /*format=*/CUDNN_TENSOR_NCHW,
+                                              /*out_channels=*/16,
+                                              /*in_channels=*/16,
+                                              /*kernel_height=*/3,
+                                              /*kernel_width=*/3));
+
+
+        checkCUDNN(cudnnCreateConvolutionDescriptor(&convolution_descriptor));
+        checkCUDNN(cudnnSetConvolution2dDescriptor(convolution_descriptor,
+                                                   /*pad_height=*/1,
+                                                   /*pad_width=*/1,
+                                                   /*vertical_stride=*/1,
+                                                   /*horizontal_stride=*/1,
+                                                   /*dilation_height=*/1,
+                                                   /*dilation_width=*/1,
+                                                   /*mode=*/CUDNN_CROSS_CORRELATION,
+                                                   /*computeType=*/CUDNN_DATA_FLOAT));
+
+
+        checkCUDNN(
+            cudnnGetConvolutionForwardAlgorithm(cudnn,
+                                                input_descriptor,
+                                                kernel_descriptor,
+                                                convolution_descriptor,
+                                                output_descriptor,
+                                                CUDNN_CONVOLUTION_FWD_PREFER_FASTEST,
+                                                /*memoryLimitInBytes=*/0,
+                                                &convolution_algorithm));
+
+
+        checkCUDNN(cudnnGetConvolutionForwardWorkspaceSize(cudnn,
+                                                           input_descriptor,
+                                                           kernel_descriptor,
+                                                           convolution_descriptor,
+                                                           output_descriptor,
+                                                           convolution_algorithm,
+                                                           &workspace_bytes));
+
+
+        cudaMalloc(&d_workspace, workspace_bytes);
+
+
+
+#endif
         break;
     }
     case MAXP2D_1:
