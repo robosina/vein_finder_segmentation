@@ -28,7 +28,7 @@
 
 | Performance | without using cudnn (miliSecond) | with using cudnn (milimSecond) |
 | :---         |     :---:      |          ---: |
-|     | 0.089542  (11fps)      | 0.00562326  (177.83fps)      |
+|     | 0.089542 sec (11 fps)      | 0.002996 sec  (333.71 fps)      |
 
 # vein_finder_segmentation
 
