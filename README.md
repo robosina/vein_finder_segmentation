@@ -1,3 +1,13 @@
+using cudnn performance
+| First Header  | Second Header |
+| ------------- | ------------- |
+| Content Cell  | Content Cell  |
+| Content Cell  | Content Cell  |
+
+
+
+
+
 # vein_finder_segmentation
 
 input_1 (InputLayer)            (None, 256, 256, 1)     **DONE**   
@@ -77,3 +87,4 @@ conv2d_22 (Conv2D)              (None, 256, 256, 16)         **DONE**
 conv2d_23 (Conv2D)              (None, 256, 256, 2)
 
 conv2d_24 (Conv2D)              (None, 256, 256, 1) 
+
