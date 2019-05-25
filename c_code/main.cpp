@@ -100,7 +100,7 @@ vector<float> weights_conv2d_24;   //38th layer
 vector<float> bias_conv2d_24;      //38th layer
 
 extern "C" void conv2d_1(float* img_ptr,int w,int h,layer l);
-extern "C" void conv2d_2(float** output,int w, int h, layer l);
+extern "C" void conv2d_2(int w, int h, layer l);
 extern "C" void maxp2d_1(int w,int h,layer l);
 extern "C" void conv2d_3(int w,int h,layer l);
 extern "C" void conv2d_4(int w,int h,layer l);
@@ -749,74 +749,75 @@ int main(int argc, char const *argv[])
     layer_type=CONV2D_23;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_23);
     layer_type=CONV2D_24;LOAD_NEURAL_NETWORK(layer_type,256,256,l_conv2d_24);
     imshow("final_img",img);
-    waitKey(0);
     float* output_conv2d_24 = nullptr;
-    float* d_output_conv2=nullptr;
 
-    conv2d_1(img.ptr<float>(0),img.cols,img.rows,l_conv2d_1);
-    double t1=getTickCount();
-    conv2d_2(&d_output_conv2,img.cols,img.rows,l_conv2d_2);
-    maxp2d_1(img.cols/2,img.rows/2,l_maxp2d_1);
-    conv2d_3(img.cols/2,img.rows/2,l_conv2d_3);
-    conv2d_4(img.cols/2,img.rows/2,l_conv2d_4);
-    maxp2d_2(img.cols/4,img.rows/4,l_maxp2d_2);
-    conv2d_5(img.cols/4,img.rows/4,l_conv2d_5);
-    conv2d_6(img.cols/4,img.rows/4,l_conv2d_6);
-    maxp2d_3(img.cols/8,img.rows/8,l_maxp2d_3);
-    conv2d_7(img.cols/8,img.rows/8,l_conv2d_7);
-    conv2d_8(img.cols/8,img.rows/8,l_conv2d_8);
-    maxp2d_4(img.cols/16,img.rows/16,l_maxp2d_4);
-    conv2d_9(img.cols/16,img.rows/16,l_conv2d_9);
-    conv2d_10(img.cols/16,img.rows/16,l_conv2d_10);
-    upsample_2d_1(img.cols/8,img.cols/8,l_upsm2d_1);
-    conv2d_11(img.cols/8,img.rows/8,l_conv2d_11);
-    concat_1(img.cols/8,img.cols/8,l_concat_1);
-    conv2d_12(img.cols/8,img.cols/8,l_conv2d_12);
-    conv2d_13(img.cols/8,img.cols/8,l_conv2d_13);
-    upsample_2d_2(img.cols/4,img.cols/4,l_upsm2d_2);
-    conv2d_14(img.cols/4,img.cols/4,l_conv2d_14);
-    concat_2(img.cols/4,img.cols/4,l_concat_2);
-    conv2d_15(img.cols/4,img.cols/4,l_conv2d_15);
-    conv2d_16(img.cols/4,img.cols/4,l_conv2d_16);
-    upsample_2d_3(img.cols/2,img.cols/2,l_upsm2d_3);
-    conv2d_17(img.cols/2,img.cols/2,l_conv2d_17);
-    concat_3(img.cols/2,img.cols/2,l_concat_3);
-    conv2d_18(img.cols/2,img.cols/2,l_conv2d_18);
-    conv2d_19(img.cols/2,img.cols/2,l_conv2d_19);
-    upsample_2d_4(img.cols,img.cols,l_upsm2d_4);
-    conv2d_20(img.cols,img.cols,l_conv2d_20);
-    concat_4(img.cols,img.cols,l_concat_4);
-    conv2d_21(img.cols,img.cols,l_conv2d_21);
-    conv2d_22(img.cols,img.cols,l_conv2d_22);
-    conv2d_23(img.cols,img.cols,l_conv2d_23);
-    cout<<"final image without transferring data="<<(getTickCount()-t1)/getTickFrequency()<<endl;
-    conv2d_24(&output_conv2d_24,img.cols,img.cols,l_conv2d_24);
 
-    //    cout<<"final image time="<<(getTickCount()-t1)/getTickFrequency()<<endl;
+    for (int i = 0; i < 5; ++i) {
+        conv2d_1(img.ptr<float>(0),img.cols,img.rows,l_conv2d_1);
+        double t1=getTickCount();
+        conv2d_2(img.cols,img.rows,l_conv2d_2);
+        maxp2d_1(img.cols/2,img.rows/2,l_maxp2d_1);
+        conv2d_3(img.cols/2,img.rows/2,l_conv2d_3);
+        conv2d_4(img.cols/2,img.rows/2,l_conv2d_4);
+        maxp2d_2(img.cols/4,img.rows/4,l_maxp2d_2);
+        conv2d_5(img.cols/4,img.rows/4,l_conv2d_5);
+        conv2d_6(img.cols/4,img.rows/4,l_conv2d_6);
+        maxp2d_3(img.cols/8,img.rows/8,l_maxp2d_3);
+        conv2d_7(img.cols/8,img.rows/8,l_conv2d_7);
+        conv2d_8(img.cols/8,img.rows/8,l_conv2d_8);
+        maxp2d_4(img.cols/16,img.rows/16,l_maxp2d_4);
+        conv2d_9(img.cols/16,img.rows/16,l_conv2d_9);
+        conv2d_10(img.cols/16,img.rows/16,l_conv2d_10);
+        upsample_2d_1(img.cols/8,img.cols/8,l_upsm2d_1);
+        conv2d_11(img.cols/8,img.rows/8,l_conv2d_11);
+        concat_1(img.cols/8,img.cols/8,l_concat_1);
+        conv2d_12(img.cols/8,img.cols/8,l_conv2d_12);
+        conv2d_13(img.cols/8,img.cols/8,l_conv2d_13);
+        upsample_2d_2(img.cols/4,img.cols/4,l_upsm2d_2);
+        conv2d_14(img.cols/4,img.cols/4,l_conv2d_14);
+        concat_2(img.cols/4,img.cols/4,l_concat_2);
+        conv2d_15(img.cols/4,img.cols/4,l_conv2d_15);
+        conv2d_16(img.cols/4,img.cols/4,l_conv2d_16);
+        upsample_2d_3(img.cols/2,img.cols/2,l_upsm2d_3);
+        conv2d_17(img.cols/2,img.cols/2,l_conv2d_17);
+        concat_3(img.cols/2,img.cols/2,l_concat_3);
+        conv2d_18(img.cols/2,img.cols/2,l_conv2d_18);
+        conv2d_19(img.cols/2,img.cols/2,l_conv2d_19);
+        upsample_2d_4(img.cols,img.cols,l_upsm2d_4);
+        conv2d_20(img.cols,img.cols,l_conv2d_20);
+        concat_4(img.cols,img.cols,l_concat_4);
+        conv2d_21(img.cols,img.cols,l_conv2d_21);
+        conv2d_22(img.cols,img.cols,l_conv2d_22);
+        conv2d_23(img.cols,img.cols,l_conv2d_23);
+        cout<<"final image without transferring data="<<(getTickCount()-t1)/getTickFrequency()<<endl;
+        conv2d_24(&output_conv2d_24,img.cols,img.cols,l_conv2d_24);
+    }
+
+//    cout<<"final image time="<<(getTickCount()-t1)/getTickFrequency()<<endl;
     Mat final_image(256,256,CV_32F,output_conv2d_24);
     cv::normalize(final_image,final_image,255,0,NORM_MINMAX);
     final_image.convertTo(final_image,CV_8U);
 
-    imshow("final_img",final_image);
+    imshow("final_im",final_image);
     waitKey(0);
     //    return 0;
     Size OShape(l_conv2d_2.im_w,l_conv2d_2.im_h);   //output shape
     int ALen=OShape.area();  //array length
     float* output2=(float*)malloc(ALen*sizeof (float));
     vector<Mat> imgs;
-    //    for (int layer = 0; layer < l_conv2d_2.nfilters; ++layer)
-    //    {
-    //        for (int i = 0; i < ALen; ++i)
-    //        {
-    //            output2[i]=d_output_conv2[i+ALen*layer];
-    //        }
-    //        cv::Mat output_img(OShape.width,OShape.height,CV_32F,output2);
-    //        cout<<output_img.rowRange(0,10).colRange(0,10)<<endl;
-    //        imshow("output",output_img);
-    //        waitKey(0);
-    //        break;
-    //        //        imgs.push_back(output_img.clone());
-    //    }
+//    for (int layer = 0; layer < l_conv2d_2.nfilters; ++layer)
+//    {
+//        for (int i = 0; i < ALen; ++i)
+//        {
+//            output2[i]=d_output_conv2[i+ALen*layer];
+//        }
+//        cv::Mat output_img(OShape.width,OShape.height,CV_32F,output2);
+//        cout<<output_img.rowRange(0,10).colRange(0,10)<<endl;
+//        imshow("output",output_img);
+//        waitKey(0);
+//        break;
+//        //        imgs.push_back(output_img.clone());
+//    }
 
     //    cout<<imgs[0].rowRange(0,5).colRange(0,5)<<endl;
     //    cout<<imgs[1].rowRange(0,5).colRange(0,5)<<endl;
