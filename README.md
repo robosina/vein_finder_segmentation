@@ -34,7 +34,7 @@
 # Network Layers
 
 | Network Layer | Shape | Status |
-| :---         |     :---:      |          ---: |
+| :---         |     :---:      |          :---: |
 | input_1 (InputLayer)     |       (None, 256, 256, 1)   |  **DONE**|   
 | conv2d_1 (Conv2D)        |       (None, 256, 256, 16)  |  **DONE** |   
 | conv2d_2 (Conv2D)        |       (None, 256, 256, 16)  |  **DONE** |
