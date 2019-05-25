@@ -1,4 +1,4 @@
-**using cudnn performance**
+# performance on using CUDNN 
 
 | Operation | without using cudnn (miliSecond) | with using cudnn (milimSecond) |
 | :---         |     :---:      |          ---: |
@@ -26,11 +26,12 @@
 | conv2d_23     | 0.527859       | 0.016212      |
 
 
+# overall performance
 | Performance | without using cudnn (miliSecond) | with using cudnn (milimSecond) |
 | :---         |     :---:      |          ---: |
 |     | 0.089542 sec (11 fps)      | 0.002996 sec  (333.71 fps)      |
 
-# Network
+# Network Layers
 
 | Network Layer | Shape | Status |
 | :---         |     :---:      |          ---: |
